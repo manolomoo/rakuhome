@@ -137,3 +137,15 @@ main,.sec{background-image:linear-gradient(var(--line),var(--line)),linear-gradi
  .ft-bn{grid-template-columns:1fr}.ft-bn a{height:120px}.ft .wrap>*{border:0;padding:0}
 }
 @media(max-width:900px){.fv-tx h1{font-size:26px;letter-spacing:.04em}}
+/* ===== TCD088 colour scheme (replaces blue palette) ===== */
+:root{--ac:#00729f;--ac2:#004968;--bg2:#f6f6f6;--line:#dddddd;--ink:#000000;--sub:#666666}
+body{color:#000}a:hover{color:#004968}
+.side-btns a{background:#00729f}.side-btns a.line{background:#004968}.side-btns a:last-child{background:#222}
+.btn:hover{background:#004968;border-color:#004968}
+.fv:after{background:linear-gradient(0deg,rgba(0,0,0,.35),rgba(0,0,0,0) 55%)}.fv-tx h1 em{color:#fff}
+.hd.solid{background:#fff;border-bottom:1px solid #ddd}.lang a.on{background:#00729f;border-color:#00729f;color:#fff}
+.band:before,.panels a:before,.ft-bn a:before{background:rgba(0,0,0,.45)}.panels a:hover:before,.ft-bn a:hover:before{background:rgba(0,114,159,.5)}
+.cta{background:#222}.cta:before{background:rgba(0,0,0,.6)}.cta .btn{color:#00729f}
+.ft{background:#fff;color:#000;border-top:1px solid #ddd}.ft .logo,.ft a{color:#000}.ft ul li a:hover{color:#00729f}
+.ft .wrap>*{border-left:1px solid #ddd}.ft small.cp{color:#000;border-top:1px solid #ddd}.ft-bn a,.ft-bn b,.ft-bn span{color:#fff}
+.feat>*{border-top-color:#00729f}.ttl .en{color:#00729f}

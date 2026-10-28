@@ -1,0 +1,4 @@
+- img/hero.jpg: "Taichung Skyline", Wikimedia Commons (from Pexels), CC0 — https://commons.wikimedia.org/wiki/File:Taichung_Skyline.jpg
+- img/theater.jpg: "National Taichung Theater 2019", Nico Kaiser, CC BY 2.0 — https://commons.wikimedia.org/wiki/File:National_Taichung_Theater_2019.jpg
+- img/skyline2.jpg: "Taichung skyline 20170128", CC BY-SA 2.0 — https://commons.wikimedia.org/wiki/File:Taichung_skyline_20170128.jpg
+- img/p_*.jpg: property photos from the current Raku Home Wix site

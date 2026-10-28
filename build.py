@@ -26,7 +26,7 @@ def page(fn,title,body,sub=True,zh=False):
 <a class="btn ln" href="{LINEURL}">LINE ID：{LINE}</a>　<a class="btn" href="mailto:{MAIL}">E-mail</a></section>
 <footer class="ft"><div class="wrap"><div><a class="logo" href="#"><b>楽房ホーム</b><small class="en">RAKU HOME</small></a><p style="margin-top:20px">40757 台中市西屯区市政路500号19F-7<br>TEL {TEL}　FAX 04-2255-6985<br>{MAIL}<br>中市仲商證字第E0258號</p></div>
 <ul>{''.join(f'<li><a href="{h}">{j}</a></li>' for h,e,j in nav[:4])}</ul><ul>{''.join(f'<li><a href="{h}">{j}</a></li>' for h,e,j in nav[4:])}<li><a href="{pre}credits.html">画像クレジット</a></li></ul></div>
-<small class="cp en">© Raku Home</small></footer><script src="{pre}js/main.js"></script></body></html>'''
+<div class="ft-bn"><a href="{pre}properties.html" style="background-image:url({pre}img/p_2l_3.jpg)"><b class="en">PROPERTY</b><span>物件情報</span></a><a href="{pre}company.html" style="background-image:url({pre}img/skyline2.jpg)"><b class="en">COMPANY</b><span>会社概要</span></a><a href="{pre}contact.html" style="background-image:url({pre}img/theater.jpg)"><b class="en">CONTACT</b><span>お問い合わせ</span></a></div><small class="cp en">© Raku Home</small></footer><script src="{pre}js/main.js"></script></body></html>'''
   open(fn,'w').write(html)
 def hero(img,en,ja,crumb):
   return f'<section class="ph-hero" style="background-image:url(img/{img})"><div><p class="en">{en}</p><h1>{ja}</h1></div></section><div class="wrap crumb">トップ ＞ {crumb}</div>'
@@ -52,12 +52,14 @@ feats=[('01','日本語で、ていねいに','お問い合わせから物件の
 ('02','取引件数1000件超','台湾に居住される日本人の皆様に広く親しまれ、取引件数は1000件を超えました。'),
 ('03','当社だけの特選物件','1R・1LDKから2LDK以上、オフィス、三井アウトレット周辺まで、特選物件を多数ご用意しております。')]
 pick=[P['1LDK'][2][0],P['2LDK以上'][2][0],P['Office'][2][0]]
-top=f'''<section class="fv"><div class="fv-img"></div><div class="fv-tx"><p class="en">TAICHUNG RENTAL SERVICE FOR JAPANESE</p><h1>部屋探しだけではなく、<br><em>"家"</em>探しの手伝い。</h1><a class="btn" href="properties.html">物件情報を見る</a></div><span class="scroll en">SCROLL</span></section>
+top=f'''<section class="fv"><div class="fv-img"></div><div class="fv-tx"><p class="en">TAICHUNG RENTAL SERVICE FOR JAPANESE</p><h1>部屋探しだけではなく、<br><em>"家"</em>探しの手伝い。</h1><a class="btn" href="properties.html">物件情報を見る</a></div><span class="scroll en">SCROLL</span><div class="fv-th"><a href="properties.html"><img src="img/p_2l_2.jpg" alt=""></a><a class="tx" href="flow.html">日本語で、ていねいに<br>物件探しから入居まで</a><a href="properties.html#office"><img src="img/p_of_1.jpg" alt=""></a></div></section><div class="tick"><time class="en">2020.06.30</time><span class="tag">BLOG</span><a href="#news">台中市北区新築高級マンション入居者募集中！</a></div>
 <section class="sec"><div class="wrap concept"><div class="rv"><div class="ttl l"><span class="en">CONCEPT</span><h2>台湾で、安心して<br>暮らすために。</h2></div></div>
 <div class="rv"><p>私たちは、台湾で安心して生活できるよう少しでもお役に立てればと考えております。</p><p>楽房不動産は最初の日本不動産投資専門をはじめ、台湾台中の賃貸にもサービス提供して参りました。取引件数は1000件を超え、台湾に居住される日本人の皆様に広く親しまれております。</p><p>お問い合わせは日本語でお気軽にどうぞ！当社だけの特選物件を多数用意しております。皆様のご連絡を心よりお待ちしております。</p></div></div></section>
-<section class="sec gray"><div class="wrap"><div class="ttl rv"><span class="en">NEWS</span><h2>お知らせ</h2></div><ul class="news rv">
+<section class="sec gray" id="news"><div class="wrap"><div class="ttl rv"><span class="en">NEWS</span><h2>お知らせ</h2></div><ul class="news rv">
 <li><time class="en">2020.06.30</time><span class="tag">BLOG</span><a href="#">台中市北区新築高級マンション入居者募集中！ 商店街が充実した北区エリア。家賃2～5万/月、短期賃貸可・法人契約可・オフィス利用可。</a></li>
 <li><time class="en">----.--.--</time><span class="tag">INFO</span><span>新しいお知らせはこちらに掲載します。<span class="sample">※サンプル</span></span></li></ul></div></section>
+<section class="band" style="background-image:url(img/skyline2.jpg)"><div class="wrap rv"><h2>台中で、日本と同じ安心を。</h2><p>取引件数1000件超。台湾に居住される日本人の皆様に広く親しまれてきました。</p></div></section>
+<section class="panels"><a href="flow.html" style="background-image:url(img/theater.jpg)"><b class="en">FLOW</b><span>入居までの流れ</span></a><a href="knowledge.html" style="background-image:url(img/skyline2.jpg)"><b class="en">KNOWLEDGE</b><span>台湾住宅の知識</span></a><a href="contract.html" style="background-image:url(img/hero.jpg)"><b class="en">CONTRACT</b><span>契約と費用</span></a><a href="life.html" style="background-image:url(img/hero_blue.jpg)"><b class="en">LIFE</b><span>台中の生活情報</span></a></section>
 <section class="sec"><div class="wrap"><div class="ttl rv"><span class="en">REASON</span><h2>楽房ホームが選ばれる理由</h2></div><div class="feat">{''.join(f'<div class="rv" style="background:var(--bg2)"><span class="no en">{a}</span><h3>{b}</h3><p>{c}</p></div>' for a,b,c in feats)}</div></div></section>
 <section class="sec gray"><div class="wrap"><div class="ttl rv"><span class="en">PROPERTY</span><h2>物件情報</h2></div><div class="cards">{''.join(card(c,t) for c,t in zip(pick,['1LDK','2LDK+','OFFICE']))}</div>
 <p style="text-align:center;margin-top:56px"><a class="btn ghost" href="properties.html">すべての物件を見る</a></p></div></section>

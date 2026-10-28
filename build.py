@@ -119,13 +119,13 @@ cbody=f'''<section class="sec" style="padding-top:60px"><div class="wrap"><div c
 page('contact.html','お問い合わせ',hero('theater.jpg','CONTACT','お問い合わせ','お問い合わせ')+cbody)
 # credits
 cr='''<section class="sec" style="padding-top:140px"><div class="wrap"><div class="ttl"><span class="en">CREDITS</span><h2>画像クレジット</h2></div><table class="co">
-<tr><th>boulevard.jpg</th><td>AI 生成画像（イメージ）</td></tr><tr><th>hero.jpg</th><td>"Taichung Skyline" — Wikimedia Commons（元画像 Pexels）, CC0<br>https://commons.wikimedia.org/wiki/File:Taichung_Skyline.jpg</td></tr>
+<tr><th>hero_blue.jpg</th><td>楽房ホーム提供</td></tr><tr><th>hero.jpg</th><td>"Taichung Skyline" — Wikimedia Commons（元画像 Pexels）, CC0<br>https://commons.wikimedia.org/wiki/File:Taichung_Skyline.jpg</td></tr>
 <tr><th>theater.jpg</th><td>"National Taichung Theater 2019" — Nico Kaiser, CC BY 2.0<br>https://commons.wikimedia.org/wiki/File:National_Taichung_Theater_2019.jpg</td></tr>
 <tr><th>skyline2.jpg</th><td>"Taichung skyline 20170128" — bryan..., CC BY-SA 2.0<br>https://commons.wikimedia.org/wiki/File:Taichung_skyline_20170128.jpg</td></tr>
 <tr><th>p_*.jpg</th><td>物件写真：楽房ホーム旧サイト（mookyoto.wixsite.com/rakuhome）掲載画像</td></tr></table></div></section>'''
 page('credits.html','画像クレジット',cr)
 # zh top
-zh=f'''<section class="fv"><div class="fv-img" style="background-image:url(../img/boulevard.jpg)"></div><div class="fv-tx"><p class="en">TAICHUNG RENTAL SERVICE</p><h1>讓您找到<br><em>「家」</em>的感覺</h1><a class="btn" href="../contact.html">聯絡我們</a></div></section>
+zh=f'''<section class="fv"><div class="fv-img" style="background-image:url(../img/hero_blue.jpg)"></div><div class="fv-tx"><p class="en">TAICHUNG RENTAL SERVICE</p><h1>讓您找到<br><em>「家」</em>的感覺</h1><a class="btn" href="../contact.html">聯絡我們</a></div></section>
 <section class="sec"><div class="wrap concept"><div class="rv"><div class="ttl l"><span class="en">ABOUT</span><h2>公司概要</h2></div></div><div class="rv">
 <p>本公司位於台中七期市政路上，專營台日不動產相關業務。為台灣房東與日本租客把關，幫助客戶跨越語言隔閡，順利完成契約為目的。</p>
 <p>楽房不動產擁有充滿日本相關情報的專業團隊，以及超過1000件以上的物件。</p>

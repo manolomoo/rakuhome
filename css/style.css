@@ -152,3 +152,5 @@ body{color:#000}a:hover{color:#004968}
 .card .thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:2px}.card .thumbs img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
 .card .fts{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 14px}.card .fts span{font-size:11px;border:1px solid #00729f;color:#00729f;border-radius:999px;padding:1px 10px}
 .card .src{margin-top:14px;font-size:13px}.card .src a{color:#00729f;font-weight:600}.card .src small{display:block;color:#888;font-size:11px;margin-top:4px}
+.img-lbl{position:absolute;left:8px;bottom:8px;background:rgba(0,0,0,.55);color:#fff;font-size:11px;padding:2px 8px;border-radius:2px;letter-spacing:.1em;z-index:2}
+.thumbs{position:relative}.thumbs::after{content:"イメージ";position:absolute;right:6px;bottom:6px;background:rgba(0,0,0,.55);color:#fff;font-size:10px;padding:1px 6px}

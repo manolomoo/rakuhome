@@ -26,11 +26,11 @@ def page(fn,title,body,sub=True,zh=False):
 <a class="btn ln" href="{LINEURL}">LINE ID：{LINE}</a>　<a class="btn" href="mailto:{MAIL}">E-mail</a></section>
 <footer class="ft"><div class="wrap"><div><a class="logo" href="#"><b>楽房ホーム</b><small class="en">RAKU HOME</small></a><p style="margin-top:20px">40757 台中市西屯区市政路500号19F-7<br>TEL {TEL}　FAX 04-2255-6985<br>{MAIL}<br>中市仲商證字第E0258號</p></div>
 <ul>{''.join(f'<li><a href="{h}">{j}</a></li>' for h,e,j in nav[:4])}</ul><ul>{''.join(f'<li><a href="{h}">{j}</a></li>' for h,e,j in nav[4:])}<li><a href="{pre}credits.html">画像クレジット</a></li></ul></div>
-<div class="ft-bn"><a href="{pre}properties.html" style="background-image:url({pre}img/r_22235760_0.jpg)"><b class="en">PROPERTY</b><span>物件情報</span></a><a href="{pre}company.html" style="background-image:url({pre}img/skyline2.jpg)"><b class="en">COMPANY</b><span>会社概要</span></a><a href="{pre}contact.html" style="background-image:url({pre}img/theater.jpg)"><b class="en">CONTACT</b><span>お問い合わせ</span></a></div><small class="cp en">© Raku Home</small></footer><script src="{pre}js/main.js"></script></body></html>'''
+<div class="ft-bn"><a href="{pre}properties.html" style="background-image:url({pre}img/ai_ext_4.jpg)"><b class="en">PROPERTY</b><span>物件情報</span></a><a href="{pre}company.html" style="background-image:url({pre}img/skyline2.jpg)"><b class="en">COMPANY</b><span>会社概要</span></a><a href="{pre}contact.html" style="background-image:url({pre}img/theater.jpg)"><b class="en">CONTACT</b><span>お問い合わせ</span></a></div><small class="cp en">© Raku Home</small></footer><script src="{pre}js/main.js"></script></body></html>'''
   open(fn,'w').write(html)
 def hero(img,en,ja,crumb):
   return f'<section class="ph-hero" style="background-image:url(img/{img})"><div><p class="en">{en}</p><h1>{ja}</h1></div></section><div class="wrap crumb">トップ ＞ {crumb}</div>'
-NOTE='<p class="note">※広さは、台湾の商習慣上、共用部分を含んだ面積表示となります。実際のお部屋の広さは、表示の7～8割程度となりますのでご注意ください。<br>※物件情報は591租屋網の掲載内容（2026年10月確認）をもとにしています。空室状況・賃料は変動しますので、最新情報はお問い合わせください。<br>※写真は591租屋網掲載画像です。</p>'
+NOTE='<p class="note">※広さは、台湾の商習慣上、共用部分を含んだ面積表示となります。実際のお部屋の広さは、表示の7～8割程度となりますのでご注意ください。<br>※物件情報は591租屋網の掲載内容（2026年10月確認）をもとにしています。空室状況・賃料は変動しますので、最新情報はお問い合わせください。<br>※掲載写真はすべてイメージ（AI生成の参考画像）であり、実際の建物・お部屋ではありません。</p>'
 import json,re
 R=json.load(open('data/props.json'))
 FT={'拎包入住':'家具家電付き','近商圈':'商圏至近','有電梯':'エレベーター有','可開伙':'自炊可','有車位':'駐車場有','隨時可遷入':'即入居可','可養寵物':'ペット可','租金補貼':'家賃補助申請可','可報稅':'申告可','近捷運':'MRT駅近','南北通透':'南北に窓・風通し良好','可入籍':'住民登録可'}
@@ -51,14 +51,14 @@ P={k:v for k,v in P.items() if v[2]}
 def card(c,t):
   dl=[('間取り',c['lj']+f"（{c['layout']}）"),('広さ',c['ping']+'（591表示面積）'),('階数',c['floor']),('所在地','台中市'+c['addr']),('管理費',c['mgmt']),('駐車場賃料',c['park']),('保証金',ja(c['deposit'])),('築年数',('築'+c['age']) if c['age'] else ''),('最短契約',ja(c['minterm'])),('ペット','可' if c['pet']=='可養寵物' else '不可')]
   th=''.join(f'<img src="img/{i}" alt="" loading="lazy">' for i in c['imgs'][1:4])
-  return f"""<article class="card rv"><div class="ph"><img src="img/{c['imgs'][0]}" alt="{c['name']}" loading="lazy"></div><div class="thumbs">{th}</div><div class="bd"><p class="type en">{t}</p><h3>{c['name']}</h3><p class="rent">{c['rent']}</p>
+  return f"""<article class="card rv"><div class="ph" style="position:relative"><img src="img/{c['imgs'][0]}" alt="{c['name']}（イメージ）" loading="lazy"><span class="img-lbl">イメージ</span></div><div class="thumbs">{th}</div><div class="bd"><p class="type en">{t}</p><h3>{c['name']}</h3><p class="rent">{c['rent']}</p>
 <p class="fts">{''.join(f'<span>{f}</span>' for f in c['feats'])}</p><dl>{''.join(f'<dt>{a}</dt><dd>{b}</dd>' for a,b in dl if b)}</dl><p class="src"><a href="{c['url']}" target="_blank" rel="noopener">591租屋網で詳細を見る ›</a><small>掲載情報は591（{c['date'].replace('此房屋在','').replace('發佈','')}掲載）より。成約済みの場合があります。</small></p></div></article>"""
 # TOP
 feats=[('01','日本語で、ていねいに','お問い合わせから物件のご案内、契約まで日本語で対応いたします。お気軽にどうぞ。'),
 ('02','取引件数1000件超','台湾に居住される日本人の皆様に広く親しまれ、取引件数は1000件を超えました。'),
 ('03','当社だけの特選物件','1R・1LDKから2LDK以上、オフィス、三井アウトレット周辺まで、特選物件を多数ご用意しております。')]
 pick=[P['1LDK'][2][0],P['2LDK以上'][2][0],P['2LDK以上'][2][3]]
-top=f'''<section class="fv"><div class="fv-img"></div><div class="fv-tx"><p class="en">TAICHUNG RENTAL SERVICE FOR JAPANESE</p><h1>部屋探しだけではなく、<br><em>"家"</em>探しの手伝い。</h1><a class="btn" href="properties.html">物件情報を見る</a></div><span class="scroll en">SCROLL</span><div class="fv-th"><a href="properties.html"><img src="img/r_22197492_0.jpg" alt=""></a><a class="tx" href="flow.html">日本語で、ていねいに<br>物件探しから入居まで</a><a href="properties.html#2ldk"><img src="img/r_22163324_0.jpg" alt=""></a></div></section><div class="tick"><time class="en">2020.06.30</time><span class="tag">BLOG</span><a href="#news">台中市北区新築高級マンション入居者募集中！</a></div>
+top=f'''<section class="fv"><div class="fv-img"></div><div class="fv-tx"><p class="en">TAICHUNG RENTAL SERVICE FOR JAPANESE</p><h1>部屋探しだけではなく、<br><em>"家"</em>探しの手伝い。</h1><a class="btn" href="properties.html">物件情報を見る</a></div><span class="scroll en">SCROLL</span><div class="fv-th"><a href="properties.html"><img src="img/ai_ext_1.jpg" alt=""></a><a class="tx" href="flow.html">日本語で、ていねいに<br>物件探しから入居まで</a><a href="properties.html#2ldk"><img src="img/ai_int_living1.jpg" alt=""></a></div></section><div class="tick"><time class="en">2020.06.30</time><span class="tag">BLOG</span><a href="#news">台中市北区新築高級マンション入居者募集中！</a></div>
 <section class="sec"><div class="wrap concept"><div class="rv"><div class="ttl l"><span class="en">CONCEPT</span><h2>台湾で、安心して<br>暮らすために。</h2></div></div>
 <div class="rv"><p>私たちは、台湾で安心して生活できるよう少しでもお役に立てればと考えております。</p><p>楽房不動産は最初の日本不動産投資専門をはじめ、台湾台中の賃貸にもサービス提供して参りました。取引件数は1000件を超え、台湾に居住される日本人の皆様に広く親しまれております。</p><p>お問い合わせは日本語でお気軽にどうぞ！当社だけの特選物件を多数用意しております。皆様のご連絡を心よりお待ちしております。</p></div></div></section>
 <section class="sec gray" id="news"><div class="wrap"><div class="ttl rv"><span class="en">NEWS</span><h2>お知らせ</h2></div><ul class="news rv">
@@ -127,6 +127,7 @@ cbody=f'''<section class="sec" style="padding-top:60px"><div class="wrap"><div c
 page('contact.html','お問い合わせ',hero('theater.jpg','CONTACT','お問い合わせ','お問い合わせ')+cbody)
 # credits
 cr='''<section class="sec" style="padding-top:140px"><div class="wrap"><div class="ttl"><span class="en">CREDITS</span><h2>画像クレジット</h2></div><table class="co">
+<tr><th>ai_*.jpg</th><td>物件写真（外観・室内）はすべてAI生成のイメージ画像です。実際の建物・お部屋とは異なります。</td></tr>
 <tr><th>hero_blue.jpg</th><td>楽房ホーム提供</td></tr><tr><th>hero.jpg</th><td>"Taichung Skyline" — Wikimedia Commons（元画像 Pexels）, CC0<br>https://commons.wikimedia.org/wiki/File:Taichung_Skyline.jpg</td></tr>
 <tr><th>theater.jpg</th><td>"National Taichung Theater 2019" — Nico Kaiser, CC BY 2.0<br>https://commons.wikimedia.org/wiki/File:National_Taichung_Theater_2019.jpg</td></tr>
 <tr><th>skyline2.jpg</th><td>"Taichung skyline 20170128" — bryan..., CC BY-SA 2.0<br>https://commons.wikimedia.org/wiki/File:Taichung_skyline_20170128.jpg</td></tr>

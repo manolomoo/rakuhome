@@ -149,3 +149,6 @@ body{color:#000}a:hover{color:#004968}
 .ft{background:#fff;color:#000;border-top:1px solid #ddd}.ft .logo,.ft a{color:#000}.ft ul li a:hover{color:#00729f}
 .ft .wrap>*{border-left:1px solid #ddd}.ft small.cp{color:#000;border-top:1px solid #ddd}.ft-bn a,.ft-bn b,.ft-bn span{color:#fff}
 .feat>*{border-top-color:#00729f}.ttl .en{color:#00729f}
+.card .thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:2px}.card .thumbs img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
+.card .fts{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 14px}.card .fts span{font-size:11px;border:1px solid #00729f;color:#00729f;border-radius:999px;padding:1px 10px}
+.card .src{margin-top:14px;font-size:13px}.card .src a{color:#00729f;font-weight:600}.card .src small{display:block;color:#888;font-size:11px;margin-top:4px}

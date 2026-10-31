@@ -4,6 +4,14 @@
   var SLOTS = ['01', '02', '03'];
   var EXT_RE = /^(.*)\.(jpe?g|png|heic)$/i;
   var LS_KEY = 'rakuhome-spots-ticks-v1';
+  var SEEN_KEY = 'rakuhome-spots-titles-seen-v1';
+  var SEEN_KEY_DEMO = 'rakuhome-spots-titles-seen-demo-v1';
+  var DEMO_TIER = {
+    '東京/港區': 3,
+    '東京/新宿區': 2,
+    '京都/中京區': 1
+  };
+  var LOCK_SVG = '<svg class="lock" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>';
 
   function nfc(value) {
     return String(value).normalize('NFC');
@@ -93,6 +101,14 @@
     return url.href;
   }
 
+  function isDemo() {
+    try {
+      return new URLSearchParams(window.location.search).get('demo') === '1';
+    } catch (err) {
+      return false;
+    }
+  }
+
   function readTicks() {
     try {
       var raw = localStorage.getItem(LS_KEY);
@@ -122,8 +138,167 @@
     return cur;
   }
 
+  function tierCount(done, total) {
+    done = Number(done) || 0;
+    total = Number(total) || 0;
+    if (total <= 0 || done <= 0) return 0;
+    if (done >= total) return 3;
+    if (done * 3 >= total * 2) return 2;
+    if (done * 3 >= total) return 1;
+    return 0;
+  }
+
+  function isWardComplete(done, total) {
+    done = Number(done) || 0;
+    total = Number(total) || 0;
+    return total > 0 && done >= total;
+  }
+
+  function quotaForTier(total, tier) {
+    total = Number(total) || 0;
+    tier = Number(tier) || 0;
+    if (tier <= 0 || total <= 0) return 0;
+    if (tier >= 3) return total;
+    var min = tier === 1 ? Math.ceil(total / 3) : Math.ceil((total * 2) / 3);
+    var max = tier === 1 ? Math.ceil((total * 2) / 3) - 1 : total - 1;
+    if (max < min) return -1;
+    var done = Math.min(Math.max(min, 1), max);
+    return tierCount(done, total) === tier ? done : -1;
+  }
+
+  function wardKey(city, ward) {
+    return city + '/' + ward;
+  }
+
+  function planDemo(wards) {
+    var files = {};
+    var synthetic = {};
+    (Array.isArray(wards) ? wards : []).forEach(function (ward) {
+      var key = wardKey(ward.city, ward.ward);
+      var tier = Object.prototype.hasOwnProperty.call(DEMO_TIER, key) ? DEMO_TIER[key] : 0;
+      var spots = Array.isArray(ward.spots) ? ward.spots : [];
+      if (!spots.length) {
+        files[key] = [];
+        if (tier > 0) synthetic[key] = { done: tier, total: 3 };
+        return;
+      }
+      var count = quotaForTier(spots.length, tier);
+      if (count < 0) count = 0;
+      files[key] = spots.slice(0, count).map(function (spot) {
+        return suggestName(ward.ward, spot.cat, spot.name);
+      });
+    });
+    return { files: files, synthetic: synthetic };
+  }
+
+  function normTitles(raw) {
+    raw = raw && typeof raw === 'object' ? raw : {};
+    var labels = Array.isArray(raw.tierLabels) && raw.tierLabels.length >= 3
+      ? raw.tierLabels.slice(0, 3).map(String)
+      : ['達標 1/3', '達標 2/3', '全區完成'];
+    var map = {};
+    (Array.isArray(raw.wards) ? raw.wards : []).forEach(function (row) {
+      if (!row || !row.city || !row.ward) return;
+      map[wardKey(String(row.city), String(row.ward))] = Array.isArray(row.titles)
+        ? row.titles.map(String)
+        : [];
+    });
+    var cities = (Array.isArray(raw.cities) ? raw.cities : []).filter(function (row) {
+      return row && row.city && row.title;
+    }).map(function (row) {
+      return {
+        city: String(row.city),
+        kicker: row.kicker ? String(row.kicker) : String(row.city),
+        title: String(row.title)
+      };
+    });
+    var grand = raw.grand && typeof raw.grand === 'object' ? raw.grand : {};
+    return {
+      tierLabels: labels,
+      map: map,
+      cities: cities,
+      grand: {
+        kicker: grand.kicker ? String(grand.kicker) : '全部完成',
+        title: grand.title ? String(grand.title) : ''
+      }
+    };
+  }
+
+  function tierLabel(tier) {
+    var labels = model && model.titles ? model.titles.tierLabels : ['達標 1/3', '達標 2/3', '全區完成'];
+    return labels[tier - 1] || '';
+  }
+
+  function titlesFor(city, ward) {
+    if (!model || !model.titles) return [];
+    return model.titles.map[wardKey(city, ward)] || [];
+  }
+
+  function currentTitleName(city, ward, done, total) {
+    var tier = tierCount(done, total);
+    if (!tier) return '';
+    return titlesFor(city, ward)[tier - 1] || '';
+  }
+
+  function collectUnlocks(rows, titles) {
+    titles = titles || normTitles(null);
+    var unlocks = [];
+    var byCity = {};
+    (Array.isArray(rows) ? rows : []).forEach(function (row) {
+      var tier = tierCount(row.done, row.total);
+      var names = titles.map[wardKey(row.city, row.ward)] || [];
+      var i;
+      for (i = 1; i <= tier; i++) {
+        if (!names[i - 1]) continue;
+        unlocks.push({
+          id: 'ward:' + wardKey(row.city, row.ward) + ':' + i,
+          scope: 'ward',
+          tier: i,
+          city: row.city,
+          ward: row.ward,
+          title: names[i - 1],
+          threshold: titles.tierLabels[i - 1] || ''
+        });
+      }
+      if (!byCity[row.city]) byCity[row.city] = [];
+      byCity[row.city].push(row);
+    });
+    titles.cities.forEach(function (city) {
+      var list = byCity[city.city] || [];
+      var ready = list.length > 0 && list.every(function (row) {
+        return isWardComplete(row.done, row.total);
+      });
+      if (!ready) return;
+      unlocks.push({
+        id: 'city:' + city.city,
+        scope: 'city',
+        tier: 0,
+        city: city.city,
+        ward: '',
+        title: city.title,
+        threshold: city.kicker
+      });
+    });
+    var grandReady = rows.length > 0 && rows.every(function (row) {
+      return isWardComplete(row.done, row.total);
+    });
+    if (grandReady && titles.grand.title) {
+      unlocks.push({
+        id: 'grand',
+        scope: 'grand',
+        tier: 0,
+        city: '',
+        ward: '',
+        title: titles.grand.title,
+        threshold: titles.grand.kicker
+      });
+    }
+    return unlocks;
+  }
+
   var model = null;
   var state = { cat: 'all' };
+  var seenCache = null;
 
   function normWard(raw) {
     var spots = Array.isArray(raw && raw.spots) ? raw.spots : [];
@@ -140,39 +315,84 @@
   }
 
   function filesFor(ward) {
-    var key = ward.city + '/' + ward.ward;
+    var key = wardKey(ward.city, ward.ward);
     var list = model.files[key];
     return Array.isArray(list) ? list : [];
+  }
+
+  function progressFor(ward) {
+    var stat = analyze(ward.ward, ward.spots, filesFor(ward));
+    var key = wardKey(ward.city, ward.ward);
+    if (model.synthetic && model.synthetic[key] && stat.total === 0) {
+      var syn = model.synthetic[key];
+      return {
+        done: syn.done,
+        total: syn.total,
+        found: stat.found,
+        unmatched: stat.unmatched,
+        synthetic: true
+      };
+    }
+    return {
+      done: stat.done,
+      total: stat.total,
+      found: stat.found,
+      unmatched: stat.unmatched,
+      synthetic: false
+    };
   }
 
   function load() {
     var app = document.getElementById('app');
     app.innerHTML = '<p class="loading">讀取中…</p>';
     var base = appBase();
-    var wardsReq = fetch(new URL('data/wards.json', base), { cache: 'no-store' }).then(function (res) {
-      if (!res.ok) throw new Error('wards');
-      return res.json();
-    });
-    var statusReq = fetch(new URL('data/status.json', base), { cache: 'no-store' }).then(function (res) {
-      if (!res.ok) throw new Error('status');
-      return res.json();
-    });
-
-    wardsReq.then(function (wardsJson) {
-      return statusReq.then(function (statusJson) {
-        return { wardsJson: wardsJson, statusJson: statusJson, statusError: false };
-      }, function () {
-        return { wardsJson: wardsJson, statusJson: { updated: null, files: {} }, statusError: true };
+    function getJson(name) {
+      return fetch(new URL(name, base), { cache: 'no-store' }).then(function (res) {
+        if (!res.ok) throw new Error(name);
+        return res.json();
       });
-    }).then(function (loaded) {
-      var wards = Array.isArray(loaded.wardsJson && loaded.wardsJson.wards) ? loaded.wardsJson.wards : [];
-      var statusJson = loaded.statusJson || {};
+    }
+    var wardsReq = getJson('data/wards.json');
+    var statusReq = getJson('data/status.json');
+    var titlesReq = getJson('data/titles.json');
+
+    Promise.all([
+      wardsReq,
+      statusReq.then(function (json) {
+        return { json: json, error: false };
+      }, function () {
+        return { json: { updated: null, files: {} }, error: true };
+      }),
+      titlesReq.then(function (json) {
+        return { json: json, error: false };
+      }, function () {
+        return { json: null, error: true };
+      })
+    ]).then(function (loaded) {
+      var wardsJson = loaded[0];
+      var statusWrap = loaded[1];
+      var titlesWrap = loaded[2];
+      var wards = Array.isArray(wardsJson && wardsJson.wards) ? wardsJson.wards.map(normWard) : [];
+      var statusJson = statusWrap.json || {};
       model = {
-        wards: wards.map(normWard),
+        wards: wards,
         updated: Object.prototype.hasOwnProperty.call(statusJson, 'updated') ? statusJson.updated : null,
         files: statusJson.files && typeof statusJson.files === 'object' ? statusJson.files : {},
-        statusError: loaded.statusError
+        statusError: statusWrap.error,
+        titlesError: titlesWrap.error,
+        titles: titlesWrap.error ? null : normTitles(titlesWrap.json),
+        synthetic: null,
+        demo: false
       };
+      if (isDemo()) {
+        var plan = planDemo(model.wards);
+        model.demo = true;
+        model.updated = '示範模式';
+        model.files = plan.files;
+        model.synthetic = plan.synthetic;
+        model.statusError = false;
+      }
+      if (document.body) document.body.classList.toggle('is-demo', model.demo);
       render();
     }).catch(function () {
       app.innerHTML = '<p class="error">資料讀取失敗，請重新整理。</p>';
@@ -194,11 +414,20 @@
     var route = parseRoute();
     if (!route) renderHome();
     else renderWard(route.city, route.ward);
+    maybeToast();
   }
 
   function banner() {
-    if (!model.statusError) return '';
-    return '<p class="banner">偵測狀態讀取失敗，燈號暫時無法更新。</p>';
+    var html = '';
+    if (model.demo) {
+      html += '<p class="banner demo">示範模式：進度是模擬的雲端偵測結果，只存在這次開啟的畫面。</p>';
+    } else if (model.statusError) {
+      html += '<p class="banner">偵測狀態讀取失敗，燈號暫時無法更新。</p>';
+    }
+    if (model.titlesError) {
+      html += '<p class="banner">稱號資料讀取失敗，徽章暫時無法顯示。</p>';
+    }
+    return html;
   }
 
   function progressCard(kicker, done, total, showUpdated) {
@@ -212,38 +441,158 @@
       '<p class="pct num">' + pct(done, total) + '%</p></div>' +
       '<div class="bar lg" role="progressbar" aria-valuemin="0" aria-valuemax="' + total + '" aria-valuenow="' + done + '" aria-label="' + esc(kicker) + '">' +
       '<span style="width:' + width + '%"></span></div>' +
-      '<p class="hint">至少偵測到一張照片，這個景點即算完成。</p></section>';
+      '<p class="hint">至少偵測到一張照片，這個景點即算完成。稱號只看燈號，自行勾選不計入。</p></section>';
   }
 
   function noteBlock(text) {
     return '<section class="note"><h2>說明</h2><p>' + text + '</p></section>';
   }
 
+  function titleLine(name, tier) {
+    var cls = 'current-title' + (name ? ' is-on tier-' + tier : ' is-empty');
+    var text = name ? esc(name) : '尚未解鎖';
+    return '<p class="' + cls + '"><span>目前稱號</span><b>' + text + '</b></p>';
+  }
+
+  function rowsOf() {
+    return model.wards.map(function (ward) {
+      var prog = progressFor(ward);
+      return { ward: ward, prog: prog };
+    });
+  }
+
+  function unlockRows(rows) {
+    return rows.map(function (row) {
+      return {
+        city: row.ward.city,
+        ward: row.ward.ward,
+        done: row.prog.done,
+        total: row.prog.total
+      };
+    });
+  }
+
+  function badgeHtml(opts) {
+    var cls = 'badge scope-' + opts.scope +
+      (opts.tier ? ' tier-' + opts.tier : '') +
+      (opts.on ? ' is-on' : ' is-locked');
+    var icon = opts.on
+      ? '<span class="medal" aria-hidden="true">' + esc(opts.medal) + '</span>'
+      : LOCK_SVG;
+    var state = opts.on ? '已解鎖' : '未解鎖';
+    return '<li class="' + cls + '">' +
+      '<span class="sr-only">' + state + '</span>' +
+      icon +
+      '<span class="badge-name">' + esc(opts.title) + '</span>' +
+      '<span class="badge-threshold">' + esc(opts.threshold) + '</span></li>';
+  }
+
+  function wallHtml(rows) {
+    if (!model.titles) return '';
+    var titles = model.titles;
+    var unlocks = collectUnlocks(unlockRows(rows), titles);
+    var onIds = {};
+    unlocks.forEach(function (item) { onIds[item.id] = true; });
+    var totalBadges = model.wards.length * 3 + titles.cities.length + (titles.grand.title ? 1 : 0);
+    var grandOn = !!onIds.grand;
+    var grand = '<ul class="badge-feature">' + badgeHtml({
+      scope: 'grand',
+      tier: 0,
+      on: grandOn,
+      medal: '全',
+      title: titles.grand.title,
+      threshold: titles.grand.kicker
+    }) + '</ul>';
+    var cityItems = titles.cities.map(function (city) {
+      var id = 'city:' + city.city;
+      return badgeHtml({
+        scope: 'city',
+        tier: 0,
+        on: !!onIds[id],
+        medal: '市',
+        title: city.title,
+        threshold: city.kicker
+      });
+    }).join('');
+    var byCity = [];
+    var cityIndex = {};
+    model.wards.forEach(function (ward) {
+      if (!Object.prototype.hasOwnProperty.call(cityIndex, ward.city)) {
+        cityIndex[ward.city] = byCity.length;
+        byCity.push({ city: ward.city, wards: [] });
+      }
+      byCity[cityIndex[ward.city]].wards.push(ward);
+    });
+    var blocks = byCity.map(function (group) {
+      var wardHtml = group.wards.map(function (ward) {
+        var prog = null;
+        rows.forEach(function (row) {
+          if (!prog && row.ward === ward) prog = row.prog;
+        });
+        var tier = tierCount(prog.done, prog.total);
+        var names = titlesFor(ward.city, ward.ward);
+        var held = tier ? (names[tier - 1] || '') : '';
+        var badges = [1, 2, 3].map(function (level) {
+          return badgeHtml({
+            scope: 'ward',
+            tier: level,
+            on: tier >= level && !!names[level - 1],
+            medal: String(level),
+            title: names[level - 1] || '尚未設定',
+            threshold: tierLabel(level)
+          });
+        }).join('');
+        var heldHtml = held
+          ? '<b class="tier-' + tier + '">' + esc(held) + '</b>'
+          : '<b class="is-empty">尚未解鎖</b>';
+        return '<li class="wall-ward"><div class="wall-ward-h"><span>' + esc(ward.ward) +
+          '</span>' + heldHtml + '</div><ul class="badge-row">' + badges + '</ul></li>';
+      }).join('');
+      return '<section class="wall-city"><h3>' + esc(group.city) + '</h3><ul class="wall-wards">' +
+        wardHtml + '</ul></section>';
+    }).join('');
+    var lead = '各區完成的景點達 1/3、2/3 與全部時，依序解鎖三個稱號。一座城市裡每個區都完成，解鎖城市稱號；' +
+      model.wards.length + ' 個區全部完成，解鎖最終稱號。';
+    return '<section class="wall" id="badge-wall" aria-labelledby="wall-title">' +
+      '<div class="sec-h"><h2 id="wall-title">稱號牆</h2><span>已解鎖 ' + unlocks.length + ' / ' + totalBadges + '</span></div>' +
+      '<p class="wall-lead">' + lead + '</p>' +
+      grand +
+      '<ul class="city-row">' + cityItems + '</ul>' +
+      blocks +
+      '</section>';
+  }
+
   function renderHome() {
     document.title = '景點拍照進度';
+    var rows = rowsOf();
     var done = 0;
     var total = 0;
-    var items = model.wards.map(function (ward) {
-      var stat = analyze(ward.ward, ward.spots, filesFor(ward));
-      if (ward.spots.length) {
-        done += stat.done;
-        total += stat.total;
+    rows.forEach(function (row) {
+      if (row.prog.total) {
+        done += row.prog.done;
+        total += row.prog.total;
       }
-      return { ward: ward, stat: stat };
-    }).map(function (row) {
+    });
+    var items = rows.map(function (row) {
       var ward = row.ward;
+      var prog = row.prog;
+      var tier = tierCount(prog.done, prog.total);
+      var held = currentTitleName(ward.city, ward.ward, prog.done, prog.total);
       var place = '<span class="place"><small>' + esc(ward.city) + '</small>' + esc(ward.ward) + '</span>';
-      if (!ward.spots.length) {
+      var earned = titleLine(held, tier);
+      if (!ward.spots.length && !prog.synthetic) {
         return '<li><div class="ward"><div class="ward-top"><span class="date num">' + esc(ward.date) +
-          '</span><span class="soon">清單整理中</span></div><div class="ward-mid">' + place + '</div></div></li>';
+          '</span><span class="soon">清單整理中</span></div><div class="ward-mid">' + place +
+          '</div>' + earned + '</div></li>';
       }
-      var width = row.stat.total ? (row.stat.done / row.stat.total) * 100 : 0;
+      var width = prog.total ? (prog.done / prog.total) * 100 : 0;
       var href = '#/' + ward.city + '/' + ward.ward;
       return '<li><a class="ward" href="' + esc(href) + '"><div class="ward-top"><span class="date num">' +
-        esc(ward.date) + '</span><span class="frac num"><b>' + row.stat.done + '</b><span> / ' + row.stat.total +
+        esc(ward.date) + '</span><span class="frac num"><b>' + prog.done + '</b><span> / ' + prog.total +
         '</span></span></div><div class="ward-mid">' + place + '<i class="go" aria-hidden="true"></i></div>' +
-        '<div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="' + row.stat.total +
-        '" aria-valuenow="' + row.stat.done + '" aria-label="' + esc(ward.city + ward.ward) + '進度">' +
+        earned +
+        '<div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="' + prog.total +
+        '" aria-valuenow="' + prog.done + '" aria-label="' + esc(ward.city + ward.ward) + '進度">' +
         '<span style="width:' + width + '%"></span></div></a></li>';
     }).join('');
 
@@ -252,10 +601,28 @@
       banner() +
       '<div class="desk-split">' +
       progressCard('整體進度', done, total, true) +
-      noteBlock('請將照片上傳到 Google Drive 資料夾「物件景點／城市／區」，並使用建議檔名。同一景點最多三張，尾碼為 01、02、03。燈號只看雲端偵測結果，每次偵測後會更新。勾選框是自己的紀錄，只存在這台裝置。') +
+      noteBlock('請將照片上傳到 Google Drive 資料夾「物件景點／城市／區」，並使用建議檔名。同一景點最多三張，尾碼為 01、02、03。燈號只看雲端偵測結果，每次偵測後會更新。勾選框是自己的紀錄，只存在這台裝置。稱號依各區已偵測完成的景點比例解鎖。') +
       '</div>' +
+      wallHtml(rows) +
       '<div class="sec-h"><h2>行程</h2><span>' + model.wards.length + ' 個區域</span></div>' +
       '<ol class="wards">' + items + '</ol>';
+  }
+
+  function wardLadder(ward, prog) {
+    if (!model.titles) return '';
+    var tier = tierCount(prog.done, prog.total);
+    var names = titlesFor(ward.city, ward.ward);
+    var badges = [1, 2, 3].map(function (level) {
+      return badgeHtml({
+        scope: 'ward',
+        tier: level,
+        on: tier >= level && !!names[level - 1],
+        medal: String(level),
+        title: names[level - 1] || '尚未設定',
+        threshold: tierLabel(level)
+      });
+    }).join('');
+    return '<ul class="badge-row ward-ladder">' + badges + '</ul>';
   }
 
   function renderWard(city, wardName) {
@@ -272,7 +639,9 @@
     }
 
     document.title = ward.city + ' ' + ward.ward + '｜景點拍照進度';
-    var stat = analyze(ward.ward, ward.spots, filesFor(ward));
+    var prog = progressFor(ward);
+    var tier = tierCount(prog.done, prog.total);
+    var held = currentTitleName(ward.city, ward.ward, prog.done, prog.total);
     var cats = new Map();
     ward.spots.forEach(function (spot) {
       cats.set(spot.cat, (cats.get(spot.cat) || 0) + 1);
@@ -290,7 +659,7 @@
     var rows = ward.spots.map(function (spot, index) {
       var key = spotKey(ward.city, ward.ward, spot.cat, spot.name);
       var ticks = ticksFor(key);
-      var slots = stat.found[index] || [false, false, false];
+      var slots = prog.found[index] || [false, false, false];
       var count = slots.filter(Boolean).length;
       var hit = count > 0;
       var warn = ticks.some(Boolean) && !hit;
@@ -317,30 +686,116 @@
     }).length;
 
     var mismatch = '';
-    if (stat.unmatched.length) {
+    if (prog.unmatched.length) {
       mismatch = '<section class="mismatch"><h2>檔名對不上清單</h2><ul>' +
-        stat.unmatched.map(function (name) { return '<li><code>' + esc(name) + '</code></li>'; }).join('') +
+        prog.unmatched.map(function (name) { return '<li><code>' + esc(name) + '</code></li>'; }).join('') +
         '</ul></section>';
     }
 
+    var pending = '清單整理中';
+    if (prog.synthetic) pending += '。示範模式先以 ' + prog.done + '/' + prog.total + ' 模擬完成比例。';
     var body = (ward.spots.length
       ? '<div class="sec-h"><h2>景點清單</h2><span id="shown">顯示 ' + shown + ' 個</span></div>' +
         '<div class="chips" role="toolbar" aria-label="分類篩選">' + chips + '</div>' +
         '<div class="table-wrap"><table class="spots"><caption class="sr-only">' + esc(ward.ward) +
         '景點拍照清單</caption><thead><tr><th scope="col">分類</th><th scope="col">名稱</th><th scope="col">建議檔名</th>' +
         '<th scope="col">自行勾選</th><th scope="col">燈號</th></tr></thead><tbody>' + rows + '</tbody></table></div>'
-      : '<p class="pending-note">清單整理中</p>') + mismatch;
+      : '<p class="pending-note">' + esc(pending) + '</p>') + mismatch;
 
     var folder = '物件景點／' + ward.city + '／' + ward.ward;
+    var plate = model.titles ? '<div class="title-plate">' + titleLine(held, tier) + wardLadder(ward, prog) + '</div>' : '';
     app.innerHTML =
       '<header class="mast"><a class="back" href="#/">返回總覽</a><p class="brand">' + esc(ward.date) + ' · ' +
-      esc(ward.city) + '</p><h1>' + esc(ward.ward) + '</h1></header>' +
+      esc(ward.city) + '</p><h1>' + esc(ward.ward) + '</h1>' + plate + '</header>' +
       banner() +
       '<div class="desk-split">' +
-      (ward.spots.length ? progressCard(ward.ward + '進度', stat.done, stat.total, true) : '') +
-      noteBlock('請上傳到 Google Drive「' + esc(folder) + '」，並使用建議檔名。燈號會在每次偵測後更新。勾選框只存在這台裝置。') +
+      (ward.spots.length || prog.synthetic ? progressCard(ward.ward + '進度', prog.done, prog.total, true) : '') +
+      noteBlock('請上傳到 Google Drive「' + esc(folder) + '」，並使用建議檔名。燈號會在每次偵測後更新。勾選框只存在這台裝置，也不會讓稱號提前解鎖。') +
       '</div>' +
       body;
+  }
+
+  function seenStorageKey() {
+    return model && model.demo ? SEEN_KEY_DEMO : SEEN_KEY;
+  }
+
+  function readSeen() {
+    if (seenCache) return seenCache;
+    try {
+      var raw = localStorage.getItem(seenStorageKey());
+      var data = raw ? JSON.parse(raw) : {};
+      seenCache = data && typeof data === 'object' && !Array.isArray(data) ? data : {};
+    } catch (err) {
+      seenCache = {};
+    }
+    return seenCache;
+  }
+
+  function writeSeen(data) {
+    seenCache = data;
+    try { localStorage.setItem(seenStorageKey(), JSON.stringify(data)); } catch (err) {}
+  }
+
+  function toastHost() {
+    var host = document.getElementById('toasts');
+    if (host) return host;
+    host = document.createElement('div');
+    host.id = 'toasts';
+    host.className = 'toasts';
+    host.setAttribute('aria-live', 'polite');
+    host.setAttribute('aria-atomic', 'false');
+    document.body.appendChild(host);
+    return host;
+  }
+
+  function toastMeta(item) {
+    if (item.scope === 'ward') return item.city + '・' + item.ward + '・' + item.threshold;
+    return item.threshold;
+  }
+
+  function pushToast(item) {
+    var host = toastHost();
+    var node = document.createElement('div');
+    node.className = 'toast scope-' + item.scope + (item.tier ? ' tier-' + item.tier : '');
+    node.setAttribute('data-toast-id', item.id);
+    node.innerHTML =
+      '<span class="medal" aria-hidden="true">' + esc(item.scope === 'grand' ? '全' : item.scope === 'city' ? '市' : String(item.tier)) + '</span>' +
+      '<div class="toast-copy"><p class="toast-kicker">恭喜解鎖</p><p class="toast-title">' + esc(item.title) +
+      '</p><p class="toast-meta">' + esc(toastMeta(item)) + '</p></div>' +
+      '<button type="button" class="toast-x" data-toast-close aria-label="關閉提示">×</button>';
+    host.appendChild(node);
+    clearTimeout(node._timer);
+    node._timer = setTimeout(function () { dismissToast(node); }, 12000);
+  }
+
+  function dismissToast(node) {
+    if (!node || !node.parentNode) return;
+    node.classList.add('is-out');
+    var remove = function () {
+      if (node.parentNode) node.parentNode.removeChild(node);
+    };
+    node.addEventListener('animationend', remove, { once: true });
+    setTimeout(remove, 400);
+  }
+
+  function maybeToast() {
+    if (!model || !model.titles || typeof document === 'undefined') return;
+    var rows = rowsOf();
+    var unlocks = collectUnlocks(unlockRows(rows), model.titles);
+    var seen = readSeen();
+    var fresh = unlocks.filter(function (item) { return !seen[item.id]; });
+    if (!fresh.length) return;
+    fresh.sort(function (a, b) {
+      function rank(item) {
+        if (item.scope === 'grand') return 0;
+        if (item.scope === 'city') return 1;
+        return 10 - item.tier;
+      }
+      return rank(a) - rank(b);
+    });
+    fresh.forEach(function (item) { seen[item.id] = 1; });
+    writeSeen(seen);
+    fresh.forEach(pushToast);
   }
 
   function applyFilter() {
@@ -398,6 +853,11 @@
   }
 
   function onClick(event) {
+    var closeBtn = event.target.closest('[data-toast-close]');
+    if (closeBtn) {
+      dismissToast(closeBtn.closest('.toast'));
+      return;
+    }
     var copyBtn = event.target.closest('button[data-copy]');
     if (copyBtn) {
       event.preventDefault();
@@ -430,7 +890,13 @@
     spotKey: spotKey,
     pct: pct,
     formatUpdated: formatUpdated,
-    fold: fold
+    fold: fold,
+    tierCount: tierCount,
+    isWardComplete: isWardComplete,
+    quotaForTier: quotaForTier,
+    planDemo: planDemo,
+    normTitles: normTitles,
+    collectUnlocks: collectUnlocks
   };
   if (typeof globalThis !== 'undefined') globalThis.SpotsCore = api;
 
@@ -438,7 +904,7 @@
     document.addEventListener('DOMContentLoaded', function () {
       var app = document.getElementById('app');
       if (!app) return;
-      app.addEventListener('click', onClick);
+      document.addEventListener('click', onClick);
       app.addEventListener('change', onChange);
       window.addEventListener('hashchange', function () {
         state.cat = 'all';

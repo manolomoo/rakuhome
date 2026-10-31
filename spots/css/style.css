@@ -229,6 +229,8 @@ a.ward:focus-visible {
   line-height: 1.65;
 }
 
+.desk-split { display: block; }
+
 .note {
   margin-top: 14px;
   padding: 14px 16px;
@@ -577,11 +579,42 @@ table.spots tr.spot:last-child td { border-bottom: 0; }
   .wrap { padding-top: 28px; }
   .mast h1 { font-size: 34px; }
   .hero-card { padding: 20px 22px; }
+  .desk-split:has(.hero-card) {
+    display: grid;
+    grid-template-columns: minmax(0, 1.45fr) minmax(300px, 0.9fr);
+    gap: 16px;
+    align-items: stretch;
+  }
+  .desk-split .note { margin-top: 0; }
+  .wards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .wards > li { display: flex; min-width: 0; }
+  .wards .ward { flex: 1; width: 100%; }
   .tick { flex: none; width: 56px; }
   .tick span { min-height: 36px; }
+  table.spots { table-layout: fixed; }
+  table.spots th:nth-child(1),
+  table.spots td.td-cat { width: 108px; }
+  table.spots th:nth-child(2),
+  table.spots td.td-name { width: 18%; }
+  table.spots th:nth-child(4),
+  table.spots td.td-ticks { width: 220px; }
+  table.spots th:nth-child(5),
+  table.spots td.td-lamp { width: 188px; }
+  table.spots td { vertical-align: middle; }
   table.spots tr.spot:hover td { background: #f8fbfc; }
-  table.spots td.td-lamp { width: 11.5em; }
+  table.spots tr.spot.has-warn td { background: #fffaf3; }
+  table.spots tr.spot.has-warn:hover td { background: #fff6ea; }
   .fname { align-items: center; }
+  .warn { margin-top: 6px; }
+}
+
+@media (min-width: 1280px) {
+  .wrap { width: min(1360px, 100%); }
+  .wards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
 @media (max-width: 1039px) {

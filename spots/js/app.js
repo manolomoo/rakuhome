@@ -250,8 +250,10 @@
     document.getElementById('app').innerHTML =
       '<header class="mast"><p class="brand">物件景點</p><h1>景點拍照進度</h1></header>' +
       banner() +
+      '<div class="desk-split">' +
       progressCard('整體進度', done, total, true) +
       noteBlock('請將照片上傳到 Google Drive 資料夾「物件景點／城市／區」，並使用建議檔名。同一景點最多三張，尾碼為 01、02、03。燈號只看雲端偵測結果，每次偵測後會更新。勾選框是自己的紀錄，只存在這台裝置。') +
+      '</div>' +
       '<div class="sec-h"><h2>行程</h2><span>' + model.wards.length + ' 個區域</span></div>' +
       '<ol class="wards">' + items + '</ol>';
   }
@@ -298,7 +300,7 @@
         return '<label class="tick"><input type="checkbox" data-tick="' + slotIndex + '"' +
           (ticks[slotIndex] ? ' checked' : '') + ' aria-label="' + slot + '"><span>' + slot + '</span></label>';
       }).join('');
-      return '<tr class="spot' + (hidden ? ' is-hide' : '') + '" data-key="' + esc(key) + '" data-cat="' +
+      return '<tr class="spot' + (hidden ? ' is-hide' : '') + (warn ? ' has-warn' : '') + '" data-key="' + esc(key) + '" data-cat="' +
         esc(spot.cat) + '" data-hit="' + (hit ? '1' : '0') + '">' +
         '<td class="td-cat"><span class="cat">' + esc(spot.cat) + '</span></td>' +
         '<td class="td-name"><span class="spot-name">' + esc(spot.name) + '</span></td>' +
@@ -334,8 +336,10 @@
       '<header class="mast"><a class="back" href="#/">返回總覽</a><p class="brand">' + esc(ward.date) + ' · ' +
       esc(ward.city) + '</p><h1>' + esc(ward.ward) + '</h1></header>' +
       banner() +
+      '<div class="desk-split">' +
       (ward.spots.length ? progressCard(ward.ward + '進度', stat.done, stat.total, true) : '') +
       noteBlock('請上傳到 Google Drive「' + esc(folder) + '」，並使用建議檔名。燈號會在每次偵測後更新。勾選框只存在這台裝置。') +
+      '</div>' +
       body;
   }
 
@@ -414,8 +418,10 @@
     var row = input.closest('tr.spot');
     if (!row) return;
     var ticks = writeTick(row.getAttribute('data-key'), Number(input.getAttribute('data-tick')), input.checked);
+    var showWarn = ticks.some(Boolean) && row.getAttribute('data-hit') !== '1';
     var warn = row.querySelector('.warn');
-    if (warn) warn.classList.toggle('is-hide', !(ticks.some(Boolean) && row.getAttribute('data-hit') !== '1'));
+    if (warn) warn.classList.toggle('is-hide', !showWarn);
+    row.classList.toggle('has-warn', showWarn);
   }
 
   var api = {

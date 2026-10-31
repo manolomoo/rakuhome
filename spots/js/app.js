@@ -12,6 +12,68 @@
     '京都/中京區': 1
   };
   var LOCK_SVG = '<svg class="lock" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>';
+  var iconSeq = 0;
+
+  function nextIconId(prefix) {
+    iconSeq += 1;
+    return prefix + '-' + iconSeq;
+  }
+
+  function starSvg(light, mid, deep, stroke) {
+    var id = nextIconId('star');
+    return '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
+      '<defs><linearGradient id="' + id + '" x1="3" y1="2" x2="18" y2="22">' +
+      '<stop offset="0" stop-color="' + light + '"/><stop offset=".48" stop-color="' + mid + '"/>' +
+      '<stop offset="1" stop-color="' + deep + '"/></linearGradient></defs>' +
+      '<path fill="url(#' + id + ')" stroke="' + stroke + '" stroke-width=".8" stroke-linejoin="round" d="M12 1.7 14.85 8.05 21.6 8.7 16.5 13.15 18.05 19.75 12 16.35 5.95 19.75 7.5 13.15 2.4 8.7 9.15 8.05z"/>' +
+      '<path fill="#fff" fill-opacity=".55" d="M12 1.7 10.15 6.9 9.15 8.05h5.7L12 3.35z"/></svg>';
+  }
+
+  function crownSvg(sparkle) {
+    var id = nextIconId('crown');
+    var body = '<defs><linearGradient id="' + id + '" x1="3" y1="4" x2="16" y2="20">' +
+      '<stop offset="0" stop-color="#fff4c4"/><stop offset=".42" stop-color="#f0c14b"/>' +
+      '<stop offset="1" stop-color="#c4841a"/></linearGradient></defs>' +
+      '<path fill="url(#' + id + ')" stroke="#8a5a00" stroke-width=".7" stroke-linejoin="round" d="M2.8 16.2 5.2 7.6 9.3 12.1 12 3.8 14.7 12.1 18.8 7.6 21.2 16.2z"/>' +
+      '<path fill="#a86b12" d="M2.8 16.6h18.4v2.5a1 1 0 0 1-1 1H3.8a1 1 0 0 1-1-1z"/>' +
+      '<path fill="#ffe7a0" d="M3.3 16.6h17.4v.7H3.3z"/>' +
+      '<circle cx="12" cy="3.9" r="1.15" fill="#fff8dc" stroke="#8a5a00" stroke-width=".45"/>' +
+      '<circle cx="5.15" cy="7.7" r="1.05" fill="#e25b4a" stroke="#8a3030" stroke-width=".35"/>' +
+      '<circle cx="18.85" cy="7.7" r="1.05" fill="#3d8fd1" stroke="#1d4e73" stroke-width=".35"/>' +
+      '<circle cx="12" cy="11.3" r="1.05" fill="#3dae6a" stroke="#1d6b40" stroke-width=".35"/>';
+    if (!sparkle) {
+      return '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' + body + '</svg>';
+    }
+    function spark(x, y, s, fill) {
+      var a = s * 0.32;
+      return '<path fill="' + fill + '" stroke="#c4841a" stroke-width=".4" stroke-linejoin="round" d="M' + x + ' ' + (y - s) +
+        ' L' + (x + a) + ' ' + (y - a) + ' L' + (x + s) + ' ' + y + ' L' + (x + a) + ' ' + (y + a) +
+        ' L' + x + ' ' + (y + s) + ' L' + (x - a) + ' ' + (y + a) + ' L' + (x - s) + ' ' + y +
+        ' L' + (x - a) + ' ' + (y - a) + ' Z"/>';
+    }
+    return '<svg viewBox="0 0 48 48" aria-hidden="true" focusable="false">' +
+      spark(9, 11, 4.2, '#fff6c8') + spark(39.5, 9, 3.2, '#ffe08a') + spark(40, 34, 3.6, '#fff') +
+      '<g transform="translate(6 9) scale(1.5)">' + body + '</g></svg>';
+  }
+
+  function iconKind(scope, tier) {
+    if (scope === 'grand') return 'grand';
+    if (scope === 'city') return 'city';
+    if (tier === 1) return 'bronze';
+    if (tier === 2) return 'silver';
+    if (tier === 3) return 'gold';
+    return '';
+  }
+
+  function tierIcon(kind) {
+    var svg = '';
+    if (kind === 'bronze') svg = starSvg('#fff0dc', '#e39a45', '#a86520', '#8a4e12');
+    else if (kind === 'silver') svg = starSvg('#ffffff', '#d5dee8', '#7f95a8', '#5c7286');
+    else if (kind === 'gold' || kind === 'city') svg = crownSvg(false);
+    else if (kind === 'grand') svg = crownSvg(true);
+    if (!svg) return '';
+    return '<span class="tier-icon tier-icon-' + kind + '" aria-hidden="true">' + svg + '</span>';
+  }
 
   function nfc(value) {
     return String(value).normalize('NFC');
@@ -451,7 +513,8 @@
   function titleLine(name, tier) {
     var cls = 'current-title' + (name ? ' is-on tier-' + tier : ' is-empty');
     var text = name ? esc(name) : '尚未解鎖';
-    return '<p class="' + cls + '"><span>目前稱號</span><b>' + text + '</b></p>';
+    var icon = name ? tierIcon(iconKind('ward', tier)) : '';
+    return '<p class="' + cls + '"><span>目前稱號</span>' + icon + '<b>' + text + '</b></p>';
   }
 
   function rowsOf() {
@@ -476,15 +539,14 @@
     var cls = 'badge scope-' + opts.scope +
       (opts.tier ? ' tier-' + opts.tier : '') +
       (opts.on ? ' is-on' : ' is-locked');
-    var icon = opts.on
-      ? '<span class="medal" aria-hidden="true">' + esc(opts.medal) + '</span>'
-      : LOCK_SVG;
     var state = opts.on ? '已解鎖' : '未解鎖';
+    var icon = tierIcon(iconKind(opts.scope, opts.tier));
+    var lock = opts.on ? '' : LOCK_SVG;
     return '<li class="' + cls + '">' +
       '<span class="sr-only">' + state + '</span>' +
-      icon +
-      '<span class="badge-name">' + esc(opts.title) + '</span>' +
-      '<span class="badge-threshold">' + esc(opts.threshold) + '</span></li>';
+      '<span class="badge-line">' + icon +
+      '<span class="badge-name">' + esc(opts.title) + '</span></span>' +
+      '<span class="badge-threshold">' + lock + esc(opts.threshold) + '</span></li>';
   }
 
   function wallHtml(rows) {
@@ -499,7 +561,6 @@
       scope: 'grand',
       tier: 0,
       on: grandOn,
-      medal: '全',
       title: titles.grand.title,
       threshold: titles.grand.kicker
     }) + '</ul>';
@@ -509,7 +570,6 @@
         scope: 'city',
         tier: 0,
         on: !!onIds[id],
-        medal: '市',
         title: city.title,
         threshold: city.kicker
       });
@@ -537,13 +597,12 @@
             scope: 'ward',
             tier: level,
             on: tier >= level && !!names[level - 1],
-            medal: String(level),
             title: names[level - 1] || '尚未設定',
             threshold: tierLabel(level)
           });
         }).join('');
         var heldHtml = held
-          ? '<b class="tier-' + tier + '">' + esc(held) + '</b>'
+          ? '<b class="tier-' + tier + '">' + tierIcon(iconKind('ward', tier)) + esc(held) + '</b>'
           : '<b class="is-empty">尚未解鎖</b>';
         return '<li class="wall-ward"><div class="wall-ward-h"><span>' + esc(ward.ward) +
           '</span>' + heldHtml + '</div><ul class="badge-row">' + badges + '</ul></li>';
@@ -578,7 +637,9 @@
       var prog = row.prog;
       var tier = tierCount(prog.done, prog.total);
       var held = currentTitleName(ward.city, ward.ward, prog.done, prog.total);
-      var place = '<span class="place"><small>' + esc(ward.city) + '</small>' + esc(ward.ward) + '</span>';
+      var placeIcon = held ? tierIcon(iconKind('ward', tier)) : '';
+      var place = '<span class="place"><small>' + esc(ward.city) + '</small><span class="place-name">' +
+        esc(ward.ward) + placeIcon + '</span></span>';
       var earned = titleLine(held, tier);
       if (!ward.spots.length && !prog.synthetic) {
         return '<li><div class="ward"><div class="ward-top"><span class="date num">' + esc(ward.date) +
@@ -617,7 +678,6 @@
         scope: 'ward',
         tier: level,
         on: tier >= level && !!names[level - 1],
-        medal: String(level),
         title: names[level - 1] || '尚未設定',
         threshold: tierLabel(level)
       });
@@ -704,9 +764,11 @@
 
     var folder = '物件景點／' + ward.city + '／' + ward.ward;
     var plate = model.titles ? '<div class="title-plate">' + titleLine(held, tier) + wardLadder(ward, prog) + '</div>' : '';
+    var headIcon = held ? tierIcon(iconKind('ward', tier)) : '';
     app.innerHTML =
       '<header class="mast"><a class="back" href="#/">返回總覽</a><p class="brand">' + esc(ward.date) + ' · ' +
-      esc(ward.city) + '</p><h1>' + esc(ward.ward) + '</h1>' + plate + '</header>' +
+      esc(ward.city) + '</p><h1 class="' + (headIcon ? 'with-tier' : '') + '"><span>' + esc(ward.ward) +
+      '</span>' + headIcon + '</h1>' + plate + '</header>' +
       banner() +
       '<div class="desk-split">' +
       (ward.spots.length || prog.synthetic ? progressCard(ward.ward + '進度', prog.done, prog.total, true) : '') +
@@ -759,7 +821,7 @@
     node.className = 'toast scope-' + item.scope + (item.tier ? ' tier-' + item.tier : '');
     node.setAttribute('data-toast-id', item.id);
     node.innerHTML =
-      '<span class="medal" aria-hidden="true">' + esc(item.scope === 'grand' ? '全' : item.scope === 'city' ? '市' : String(item.tier)) + '</span>' +
+      tierIcon(iconKind(item.scope, item.tier)) +
       '<div class="toast-copy"><p class="toast-kicker">恭喜解鎖</p><p class="toast-title">' + esc(item.title) +
       '</p><p class="toast-meta">' + esc(toastMeta(item)) + '</p></div>' +
       '<button type="button" class="toast-x" data-toast-close aria-label="關閉提示">×</button>';

@@ -80,7 +80,9 @@
     ghost: svg('<path fill="#d9d4f5" stroke="#5b6ee1" stroke-width="1.4" stroke-linejoin="round" d="M7.2 11.2a4.8 4.8 0 0 1 9.6 0V18.6l-2.2-1.5L12 19.2l-2.6-2.1-2.2 1.5z"/><circle cx="10.2" cy="11.6" r="1.05" fill="#24324a"/><circle cx="13.8" cy="11.6" r="1.05" fill="#24324a"/>'),
     seal: svg('<circle cx="12" cy="12" r="7.6" fill="#e23d32"/><circle cx="12" cy="12" r="5.4" fill="none" stroke="#fff" stroke-width="1.2"/><path fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M8.8 12.3 11 14.4 15.4 9.6"/>'),
     roe: svg('<path fill="#f08aa8" d="M6.2 12.2c0-4.2 2.6-7 5.8-7s5.8 2.8 5.8 7-2.6 7.2-5.8 7.2-5.8-3-5.8-7.2z"/><circle cx="10" cy="10.6" r="1.15" fill="#fff"/><circle cx="13.6" cy="12.2" r="1.15" fill="#fff"/><circle cx="11.2" cy="14.4" r="1" fill="#fff"/><circle cx="14.4" cy="9.4" r=".8" fill="#fde2ea"/>'),
-    lens: svg('<path fill="#24324a" d="M7.6 7.2 9 5.2h5.2l1.4 2h3.2v9.2H4.4V7.2z"/><circle cx="11.6" cy="11.8" r="3" fill="#7ec8e3"/><circle cx="11.6" cy="11.8" r="1.5" fill="#24324a"/><path fill="#f0c14b" d="m18.2 3.2.6 1.6 1.6.2-1.2 1 .4 1.6-1.4-.8-1.4.8.4-1.6-1.2-1 1.6-.2z"/>')
+    lens: svg('<path fill="#24324a" d="M7.6 7.2 9 5.2h5.2l1.4 2h3.2v9.2H4.4V7.2z"/><circle cx="11.6" cy="11.8" r="3" fill="#7ec8e3"/><circle cx="11.6" cy="11.8" r="1.5" fill="#24324a"/><path fill="#f0c14b" d="m18.2 3.2.6 1.6 1.6.2-1.2 1 .4 1.6-1.4-.8-1.4.8.4-1.6-1.2-1 1.6-.2z"/>'),
+    broom: svg('<path stroke="#8a5a2b" stroke-width="1.8" stroke-linecap="round" d="M14.6 4.2 8.2 14.2"/><path fill="#c9843a" d="M6.2 13.2h5.2l-1.2 6.2H7.2z"/><path stroke="#f0c14b" stroke-width="1.2" stroke-linecap="round" d="M7.2 15.4h3.4M7 17.2h3.2"/>'),
+    crown: svg('<path fill="#f0c14b" d="M3.6 16.8 5.2 8.2l3.4 3.6L12 5.2l3.4 6.6 3.4-3.6 1.6 8.6z"/><path fill="#e2b15a" d="M4.4 16.8h15.2v2.2H4.4z"/><circle cx="12" cy="5.2" r="1" fill="#e23d32"/><circle cx="5.2" cy="8.2" r=".8" fill="#e23d32"/><circle cx="18.8" cy="8.2" r=".8" fill="#e23d32"/>')
   };
 
   function glyph(key) {

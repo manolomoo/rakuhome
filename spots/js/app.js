@@ -12,48 +12,19 @@
     '京都/中京區': 1
   };
   var LOCK_SVG = '<svg class="lock" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>';
-  var iconSeq = 0;
+  var HIDDEN_MARK = '？？？';
 
-  function nextIconId(prefix) {
-    iconSeq += 1;
-    return prefix + '-' + iconSeq;
+  function glyph(key) {
+    var lib = typeof globalThis !== 'undefined' ? globalThis.SpotsIcons : null;
+    if (lib && typeof lib.glyph === 'function') return lib.glyph(key || '');
+    return '';
   }
 
-  function starSvg(light, mid, deep, stroke) {
-    var id = nextIconId('star');
-    return '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
-      '<defs><linearGradient id="' + id + '" x1="3" y1="2" x2="18" y2="22">' +
-      '<stop offset="0" stop-color="' + light + '"/><stop offset=".48" stop-color="' + mid + '"/>' +
-      '<stop offset="1" stop-color="' + deep + '"/></linearGradient></defs>' +
-      '<path fill="url(#' + id + ')" stroke="' + stroke + '" stroke-width=".8" stroke-linejoin="round" d="M12 1.7 14.85 8.05 21.6 8.7 16.5 13.15 18.05 19.75 12 16.35 5.95 19.75 7.5 13.15 2.4 8.7 9.15 8.05z"/>' +
-      '<path fill="#fff" fill-opacity=".55" d="M12 1.7 10.15 6.9 9.15 8.05h5.7L12 3.35z"/></svg>';
-  }
-
-  function crownSvg(sparkle) {
-    var id = nextIconId('crown');
-    var body = '<defs><linearGradient id="' + id + '" x1="3" y1="4" x2="16" y2="20">' +
-      '<stop offset="0" stop-color="#fff4c4"/><stop offset=".42" stop-color="#f0c14b"/>' +
-      '<stop offset="1" stop-color="#c4841a"/></linearGradient></defs>' +
-      '<path fill="url(#' + id + ')" stroke="#8a5a00" stroke-width=".7" stroke-linejoin="round" d="M2.8 16.2 5.2 7.6 9.3 12.1 12 3.8 14.7 12.1 18.8 7.6 21.2 16.2z"/>' +
-      '<path fill="#a86b12" d="M2.8 16.6h18.4v2.5a1 1 0 0 1-1 1H3.8a1 1 0 0 1-1-1z"/>' +
-      '<path fill="#ffe7a0" d="M3.3 16.6h17.4v.7H3.3z"/>' +
-      '<circle cx="12" cy="3.9" r="1.15" fill="#fff8dc" stroke="#8a5a00" stroke-width=".45"/>' +
-      '<circle cx="5.15" cy="7.7" r="1.05" fill="#e25b4a" stroke="#8a3030" stroke-width=".35"/>' +
-      '<circle cx="18.85" cy="7.7" r="1.05" fill="#3d8fd1" stroke="#1d4e73" stroke-width=".35"/>' +
-      '<circle cx="12" cy="11.3" r="1.05" fill="#3dae6a" stroke="#1d6b40" stroke-width=".35"/>';
-    if (!sparkle) {
-      return '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' + body + '</svg>';
-    }
-    function spark(x, y, s, fill) {
-      var a = s * 0.32;
-      return '<path fill="' + fill + '" stroke="#c4841a" stroke-width=".4" stroke-linejoin="round" d="M' + x + ' ' + (y - s) +
-        ' L' + (x + a) + ' ' + (y - a) + ' L' + (x + s) + ' ' + y + ' L' + (x + a) + ' ' + (y + a) +
-        ' L' + x + ' ' + (y + s) + ' L' + (x - a) + ' ' + (y + a) + ' L' + (x - s) + ' ' + y +
-        ' L' + (x - a) + ' ' + (y - a) + ' Z"/>';
-    }
-    return '<svg viewBox="0 0 48 48" aria-hidden="true" focusable="false">' +
-      spark(9, 11, 4.2, '#fff6c8') + spark(39.5, 9, 3.2, '#ffe08a') + spark(40, 34, 3.6, '#fff') +
-      '<g transform="translate(6 9) scale(1.5)">' + body + '</g></svg>';
+  function lockMedalHtml() {
+    return '<span class="tier-icon is-lock" aria-hidden="true">' +
+      '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
+      '<rect x="5" y="11" width="14" height="9" rx="2"></rect>' +
+      '<path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg></span>';
   }
 
   function iconKind(scope, tier) {
@@ -65,14 +36,16 @@
     return '';
   }
 
-  function tierIcon(kind) {
-    var svg = '';
-    if (kind === 'bronze') svg = starSvg('#fff0dc', '#e39a45', '#a86520', '#8a4e12');
-    else if (kind === 'silver') svg = starSvg('#ffffff', '#d5dee8', '#7f95a8', '#5c7286');
-    else if (kind === 'gold' || kind === 'city') svg = crownSvg(false);
-    else if (kind === 'grand') svg = crownSvg(true);
-    if (!svg) return '';
-    return '<span class="tier-icon tier-icon-' + kind + '" aria-hidden="true">' + svg + '</span>';
+  function medalHtml(iconKey, scope, tier, earned) {
+    var kind = iconKind(scope, tier) || 'bronze';
+    var state = earned ? 'is-earned' : 'is-teaser';
+    return '<span class="tier-icon tier-icon-' + kind + ' ' + state + '" aria-hidden="true">' +
+      glyph(iconKey) + '</span>';
+  }
+
+  function isHiddenWhenLocked(scope, tier) {
+    if (scope === 'city' || scope === 'grand') return true;
+    return scope === 'ward' && Number(tier) >= 2;
   }
 
   function nfc(value) {
@@ -253,6 +226,28 @@
     return { files: files, synthetic: synthetic };
   }
 
+  function normEntry(entry) {
+    if (typeof entry === 'string') return { name: entry, icon: '' };
+    if (entry && typeof entry === 'object') {
+      var name = '';
+      if (entry.name != null && String(entry.name).trim()) name = String(entry.name);
+      else if (entry.title != null) name = String(entry.title);
+      return { name: name, icon: entry.icon != null ? String(entry.icon) : '' };
+    }
+    return { name: '', icon: '' };
+  }
+
+  function entryName(entry) {
+    if (!entry) return '';
+    if (typeof entry === 'string') return entry;
+    return entry.name || '';
+  }
+
+  function entryIcon(entry) {
+    if (!entry || typeof entry === 'string') return '';
+    return entry.icon || '';
+  }
+
   function normTitles(raw) {
     raw = raw && typeof raw === 'object' ? raw : {};
     var labels = Array.isArray(raw.tierLabels) && raw.tierLabels.length >= 3
@@ -262,7 +257,7 @@
     (Array.isArray(raw.wards) ? raw.wards : []).forEach(function (row) {
       if (!row || !row.city || !row.ward) return;
       map[wardKey(String(row.city), String(row.ward))] = Array.isArray(row.titles)
-        ? row.titles.map(String)
+        ? row.titles.map(normEntry)
         : [];
     });
     var cities = (Array.isArray(raw.cities) ? raw.cities : []).filter(function (row) {
@@ -271,7 +266,8 @@
       return {
         city: String(row.city),
         kicker: row.kicker ? String(row.kicker) : String(row.city),
-        title: String(row.title)
+        title: String(row.title),
+        icon: row.icon ? String(row.icon) : ''
       };
     });
     var grand = raw.grand && typeof raw.grand === 'object' ? raw.grand : {};
@@ -281,7 +277,8 @@
       cities: cities,
       grand: {
         kicker: grand.kicker ? String(grand.kicker) : '全部完成',
-        title: grand.title ? String(grand.title) : ''
+        title: grand.title ? String(grand.title) : '',
+        icon: grand.icon ? String(grand.icon) : ''
       }
     };
   }
@@ -296,10 +293,30 @@
     return model.titles.map[wardKey(city, ward)] || [];
   }
 
-  function currentTitleName(city, ward, done, total) {
+  function titleView(city, ward, done, total) {
     var tier = tierCount(done, total);
-    if (!tier) return '';
-    return titlesFor(city, ward)[tier - 1] || '';
+    var entries = titlesFor(city, ward);
+    var earnedEntry = tier > 0 ? entries[tier - 1] : null;
+    if (earnedEntry && entryName(earnedEntry)) {
+      return {
+        name: entryName(earnedEntry),
+        icon: entryIcon(earnedEntry),
+        tier: tier,
+        earned: true,
+        teaser: false
+      };
+    }
+    var first = entries[0];
+    if (first && entryName(first)) {
+      return {
+        name: entryName(first),
+        icon: entryIcon(first),
+        tier: 1,
+        earned: false,
+        teaser: true
+      };
+    }
+    return { name: '', icon: '', tier: 0, earned: false, teaser: false };
   }
 
   function collectUnlocks(rows, titles) {
@@ -308,17 +325,20 @@
     var byCity = {};
     (Array.isArray(rows) ? rows : []).forEach(function (row) {
       var tier = tierCount(row.done, row.total);
-      var names = titles.map[wardKey(row.city, row.ward)] || [];
+      var entries = titles.map[wardKey(row.city, row.ward)] || [];
       var i;
       for (i = 1; i <= tier; i++) {
-        if (!names[i - 1]) continue;
+        var entry = entries[i - 1];
+        var name = entryName(entry);
+        if (!name) continue;
         unlocks.push({
           id: 'ward:' + wardKey(row.city, row.ward) + ':' + i,
           scope: 'ward',
           tier: i,
           city: row.city,
           ward: row.ward,
-          title: names[i - 1],
+          title: name,
+          icon: entryIcon(entry),
           threshold: titles.tierLabels[i - 1] || ''
         });
       }
@@ -338,6 +358,7 @@
         city: city.city,
         ward: '',
         title: city.title,
+        icon: city.icon || '',
         threshold: city.kicker
       });
     });
@@ -352,6 +373,7 @@
         city: '',
         ward: '',
         title: titles.grand.title,
+        icon: titles.grand.icon || '',
         threshold: titles.grand.kicker
       });
     }
@@ -510,11 +532,16 @@
     return '<section class="note"><h2>說明</h2><p>' + text + '</p></section>';
   }
 
-  function titleLine(name, tier) {
-    var cls = 'current-title' + (name ? ' is-on tier-' + tier : ' is-empty');
-    var text = name ? esc(name) : '尚未解鎖';
-    var icon = name ? tierIcon(iconKind('ward', tier)) : '';
-    return '<p class="' + cls + '"><span>目前稱號</span>' + icon + '<b>' + text + '</b></p>';
+  function titleLine(view) {
+    if (!view || !view.name || (!view.earned && !view.teaser)) {
+      return '<p class="current-title is-empty"><span>目前稱號</span><b>尚未解鎖</b></p>';
+    }
+    if (!view.earned) {
+      return '<p class="current-title is-teaser"><span>目前稱號</span>' +
+        medalHtml(view.icon, 'ward', 1, false) + '<b>' + esc(view.name) + '</b></p>';
+    }
+    return '<p class="current-title is-on tier-' + view.tier + '"><span>目前稱號</span>' +
+      medalHtml(view.icon, 'ward', view.tier, true) + '<b>' + esc(view.name) + '</b></p>';
   }
 
   function rowsOf() {
@@ -536,16 +563,22 @@
   }
 
   function badgeHtml(opts) {
+    var real = opts.title || '';
+    var secret = !opts.on && isHiddenWhenLocked(opts.scope, opts.tier) && real && real !== '尚未設定';
+    var teaser = !opts.on && !secret;
     var cls = 'badge scope-' + opts.scope +
       (opts.tier ? ' tier-' + opts.tier : '') +
-      (opts.on ? ' is-on' : ' is-locked');
+      (opts.on ? ' is-on' : ' is-locked') +
+      (secret ? ' is-secret' : '') +
+      (teaser ? ' is-teaser' : '');
     var state = opts.on ? '已解鎖' : '未解鎖';
-    var icon = tierIcon(iconKind(opts.scope, opts.tier));
-    var lock = opts.on ? '' : LOCK_SVG;
+    var shown = secret ? HIDDEN_MARK : real;
+    var icon = secret ? lockMedalHtml() : medalHtml(opts.icon, opts.scope, opts.tier, !!opts.on);
+    var lock = (!opts.on && !secret) ? LOCK_SVG : '';
     return '<li class="' + cls + '">' +
       '<span class="sr-only">' + state + '</span>' +
       '<span class="badge-line">' + icon +
-      '<span class="badge-name">' + esc(opts.title) + '</span></span>' +
+      '<span class="badge-name">' + esc(shown) + '</span></span>' +
       '<span class="badge-threshold">' + lock + esc(opts.threshold) + '</span></li>';
   }
 
@@ -562,6 +595,7 @@
       tier: 0,
       on: grandOn,
       title: titles.grand.title,
+      icon: titles.grand.icon,
       threshold: titles.grand.kicker
     }) + '</ul>';
     var cityItems = titles.cities.map(function (city) {
@@ -571,6 +605,7 @@
         tier: 0,
         on: !!onIds[id],
         title: city.title,
+        icon: city.icon,
         threshold: city.kicker
       });
     }).join('');
@@ -590,20 +625,25 @@
           if (!prog && row.ward === ward) prog = row.prog;
         });
         var tier = tierCount(prog.done, prog.total);
-        var names = titlesFor(ward.city, ward.ward);
-        var held = tier ? (names[tier - 1] || '') : '';
+        var entries = titlesFor(ward.city, ward.ward);
+        var view = titleView(ward.city, ward.ward, prog.done, prog.total);
         var badges = [1, 2, 3].map(function (level) {
+          var entry = entries[level - 1];
+          var name = entryName(entry);
           return badgeHtml({
             scope: 'ward',
             tier: level,
-            on: tier >= level && !!names[level - 1],
-            title: names[level - 1] || '尚未設定',
+            on: tier >= level && !!name,
+            title: name || '尚未設定',
+            icon: entryIcon(entry),
             threshold: tierLabel(level)
           });
         }).join('');
-        var heldHtml = held
-          ? '<b class="tier-' + tier + '">' + tierIcon(iconKind('ward', tier)) + esc(held) + '</b>'
-          : '<b class="is-empty">尚未解鎖</b>';
+        var heldHtml = view.earned
+          ? '<b class="tier-' + view.tier + '">' + medalHtml(view.icon, 'ward', view.tier, true) + esc(view.name) + '</b>'
+          : (view.teaser
+            ? '<b class="is-teaser">' + medalHtml(view.icon, 'ward', 1, false) + esc(view.name) + '</b>'
+            : '<b class="is-empty">尚未解鎖</b>');
         return '<li class="wall-ward"><div class="wall-ward-h"><span>' + esc(ward.ward) +
           '</span>' + heldHtml + '</div><ul class="badge-row">' + badges + '</ul></li>';
       }).join('');
@@ -635,12 +675,11 @@
     var items = rows.map(function (row) {
       var ward = row.ward;
       var prog = row.prog;
-      var tier = tierCount(prog.done, prog.total);
-      var held = currentTitleName(ward.city, ward.ward, prog.done, prog.total);
-      var placeIcon = held ? tierIcon(iconKind('ward', tier)) : '';
+      var view = titleView(ward.city, ward.ward, prog.done, prog.total);
+      var placeIcon = view.earned ? medalHtml(view.icon, 'ward', view.tier, true) : '';
       var place = '<span class="place"><small>' + esc(ward.city) + '</small><span class="place-name">' +
         esc(ward.ward) + placeIcon + '</span></span>';
-      var earned = titleLine(held, tier);
+      var earned = titleLine(view);
       if (!ward.spots.length && !prog.synthetic) {
         return '<li><div class="ward"><div class="ward-top"><span class="date num">' + esc(ward.date) +
           '</span><span class="soon">清單整理中</span></div><div class="ward-mid">' + place +
@@ -672,13 +711,16 @@
   function wardLadder(ward, prog) {
     if (!model.titles) return '';
     var tier = tierCount(prog.done, prog.total);
-    var names = titlesFor(ward.city, ward.ward);
+    var entries = titlesFor(ward.city, ward.ward);
     var badges = [1, 2, 3].map(function (level) {
+      var entry = entries[level - 1];
+      var name = entryName(entry);
       return badgeHtml({
         scope: 'ward',
         tier: level,
-        on: tier >= level && !!names[level - 1],
-        title: names[level - 1] || '尚未設定',
+        on: tier >= level && !!name,
+        title: name || '尚未設定',
+        icon: entryIcon(entry),
         threshold: tierLabel(level)
       });
     }).join('');
@@ -700,8 +742,7 @@
 
     document.title = ward.city + ' ' + ward.ward + '｜景點拍照進度';
     var prog = progressFor(ward);
-    var tier = tierCount(prog.done, prog.total);
-    var held = currentTitleName(ward.city, ward.ward, prog.done, prog.total);
+    var view = titleView(ward.city, ward.ward, prog.done, prog.total);
     var cats = new Map();
     ward.spots.forEach(function (spot) {
       cats.set(spot.cat, (cats.get(spot.cat) || 0) + 1);
@@ -763,8 +804,8 @@
       : '<p class="pending-note">' + esc(pending) + '</p>') + mismatch;
 
     var folder = '物件景點／' + ward.city + '／' + ward.ward;
-    var plate = model.titles ? '<div class="title-plate">' + titleLine(held, tier) + wardLadder(ward, prog) + '</div>' : '';
-    var headIcon = held ? tierIcon(iconKind('ward', tier)) : '';
+    var plate = model.titles ? '<div class="title-plate">' + titleLine(view) + wardLadder(ward, prog) + '</div>' : '';
+    var headIcon = view.earned ? medalHtml(view.icon, 'ward', view.tier, true) : '';
     app.innerHTML =
       '<header class="mast"><a class="back" href="#/">返回總覽</a><p class="brand">' + esc(ward.date) + ' · ' +
       esc(ward.city) + '</p><h1 class="' + (headIcon ? 'with-tier' : '') + '"><span>' + esc(ward.ward) +
@@ -821,7 +862,7 @@
     node.className = 'toast scope-' + item.scope + (item.tier ? ' tier-' + item.tier : '');
     node.setAttribute('data-toast-id', item.id);
     node.innerHTML =
-      tierIcon(iconKind(item.scope, item.tier)) +
+      medalHtml(item.icon, item.scope, item.tier, true) +
       '<div class="toast-copy"><p class="toast-kicker">恭喜解鎖</p><p class="toast-title">' + esc(item.title) +
       '</p><p class="toast-meta">' + esc(toastMeta(item)) + '</p></div>' +
       '<button type="button" class="toast-x" data-toast-close aria-label="關閉提示">×</button>';

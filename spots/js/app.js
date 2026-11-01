@@ -10,6 +10,10 @@
   var EQUIP_KEY_DEMO = 'rakuhome-spots-equip-demo-v1';
   var SEEN_KEY = 'rakuhome-spots-titles-seen-v1';
   var SEEN_KEY_DEMO = 'rakuhome-spots-titles-seen-demo-v1';
+  var LOOT_SEEN_KEY = 'rakuhome-spots-loot-seen-v1';
+  var LOOT_SEEN_KEY_DEMO = 'rakuhome-spots-loot-seen-demo-v1';
+  var LOOT_GEAR_KEY = 'rakuhome-spots-loot-gear-v1';
+  var LOOT_GEAR_KEY_DEMO = 'rakuhome-spots-loot-gear-demo-v1';
   var DEMO_TIER = {
     '東京/港區': 3,
     '東京/新宿區': 2,
@@ -480,8 +484,12 @@
   }
 
   var model = null;
-  var state = { cat: 'all' };
+  var state = { cat: 'all', codex: 'all', gearOpen: '' };
   var seenCache = null;
+  var lootBagCache = null;
+  var lootSeenMem = { key: '', seeded: false, ids: null };
+  var lootQueue = [];
+  var lootNode = null;
 
   function normWard(raw) {
     var spots = Array.isArray(raw && raw.spots) ? raw.spots : [];
@@ -651,6 +659,7 @@
     var statusReq = getJson('data/status.json');
     var titlesReq = getJson('data/titles.json');
     var rpgReq = getJson('data/rpg.json');
+    var lootReq = getJson('data/loot.json');
 
     Promise.all([
       wardsReq,
@@ -668,12 +677,18 @@
         return { json: json, error: false };
       }, function () {
         return { json: null, error: true };
+      }),
+      lootReq.then(function (json) {
+        return { json: json, error: false };
+      }, function () {
+        return { json: null, error: true };
       })
     ]).then(function (loaded) {
       var wardsJson = loaded[0];
       var statusWrap = loaded[1];
       var titlesWrap = loaded[2];
       var rpgWrap = loaded[3];
+      var lootWrap = loaded[4];
       var wards = Array.isArray(wardsJson && wardsJson.wards) ? wardsJson.wards.map(normWard) : [];
       var statusJson = statusWrap.json || {};
       model = {
@@ -686,6 +701,8 @@
         titles: titlesWrap.error ? null : normTitles(titlesWrap.json),
         rpgError: rpgWrap.error || typeof globalThis.SpotsRpg === 'undefined',
         rpg: rpgWrap.error || typeof globalThis.SpotsRpg === 'undefined' ? null : globalThis.SpotsRpg.normConfig(rpgWrap.json),
+        lootError: lootWrap.error || typeof globalThis.SpotsLoot === 'undefined',
+        loot: lootWrap.error || typeof globalThis.SpotsLoot === 'undefined' ? null : globalThis.SpotsLoot.normLoot(lootWrap.json),
         synthetic: null,
         demo: false,
         scanIndex: {},
@@ -721,10 +738,12 @@
 
   function render() {
     if (!model) return;
+    lootBagCache = null;
     var route = parseRoute();
     if (!route) renderHome();
     else renderWard(route.city, route.ward);
     maybeToast();
+    maybeLoot();
   }
 
   function banner() {
@@ -739,6 +758,9 @@
     }
     if (model.rpgError) {
       html += '<p class="banner">冒險資料讀取失敗，等級暫時無法顯示。</p>';
+    }
+    if (model.lootError) {
+      html += '<p class="banner">戰利品資料讀取失敗，掉落暫時無法顯示。</p>';
     }
     return html;
   }
@@ -1056,7 +1078,8 @@
       '<span class="is-cloud">雲端認證 XP ' + score.cloudXp + '</span></p>' +
       '<p class="sheet-title-line"><span>最新稱號</span>' + titleHtml + '</p>' +
       '<p class="sheet-count">稱號 <b class="num">' + titleCount + '</b><span> / ' + titleTotal + '</span></p></div>' +
-      '<div class="sheet-cities"><p class="kicker">各城完成</p><ul>' + cities + '</ul></div></section>';
+      '<div class="sheet-cities"><p class="kicker">各城完成</p><ul>' + cities + '</ul></div>' +
+      gearSection() + '</section>';
   }
 
   function bossLine(city, ward, defeated) {
@@ -1142,6 +1165,405 @@
       '<ul class="chests">' + items + '</ul></section>';
   }
 
+  function lootSeenKey() {
+    return model && model.demo ? LOOT_SEEN_KEY_DEMO : LOOT_SEEN_KEY;
+  }
+
+  function lootGearKey() {
+    return model && model.demo ? LOOT_GEAR_KEY_DEMO : LOOT_GEAR_KEY;
+  }
+
+  function readLootSeen() {
+    var key = lootSeenKey();
+    if (lootSeenMem.key === key && lootSeenMem.seeded) return lootSeenMem.ids;
+    var data = readJsonStore(key);
+    if (!data || data.seeded !== true || !data.ids || typeof data.ids !== 'object' || Array.isArray(data.ids)) {
+      return null;
+    }
+    lootSeenMem = { key: key, seeded: true, ids: data.ids };
+    return data.ids;
+  }
+
+  function writeLootSeen(ids) {
+    var key = lootSeenKey();
+    lootSeenMem = { key: key, seeded: true, ids: ids };
+    try { localStorage.setItem(key, JSON.stringify({ seeded: true, ids: ids })); } catch (err) {}
+  }
+
+  function readLootGear() {
+    var data = readJsonStore(lootGearKey());
+    return data && typeof data === 'object' && !Array.isArray(data) ? data : {};
+  }
+
+  function writeLootGear(stored) {
+    try { localStorage.setItem(lootGearKey(), JSON.stringify(stored || {})); } catch (err) {}
+  }
+
+  function setGearSlot(slot, id, manual) {
+    if (globalThis.SpotsLoot.SLOTS.indexOf(slot) < 0) return;
+    var stored = readLootGear();
+    stored[slot] = { id: id || '', manual: !!manual && !!id };
+    writeLootGear(stored);
+  }
+
+  function lootReport(score) {
+    var spots = [];
+    var bosses = [];
+    model.wards.forEach(function (ward) {
+      var prog = progressFor(ward);
+      bosses.push({
+        city: ward.city,
+        ward: ward.ward,
+        defeated: prog.total > 0 && tierCount(prog.done, prog.total) >= 3
+      });
+      (prog.spots || []).forEach(function (spot) {
+        spots.push({
+          city: ward.city,
+          ward: ward.ward,
+          cat: spot.cat,
+          name: spot.name,
+          complete: !!spot.complete
+        });
+      });
+    });
+    var achievements = [];
+    if (score) {
+      achievements = score.achievements.map(function (item) {
+        return { id: item.id, name: item.name, unlocked: !!item.unlocked };
+      });
+    }
+    return { spots: spots, bosses: bosses, achievements: achievements };
+  }
+
+  function lootBag() {
+    if (lootBagCache) return lootBagCache;
+    if (!model || !model.loot || typeof globalThis.SpotsLoot === 'undefined') return null;
+    lootBagCache = globalThis.SpotsLoot.collect(model.loot, lootReport(scoreNow()));
+    return lootBagCache;
+  }
+
+  function rarityClass(id) {
+    if (id === 'rare' || id === 'epic' || id === 'legendary' || id === 'common') return 'rarity-' + id;
+    return 'rarity-common';
+  }
+
+  function lootIconHtml(icon, extraClass) {
+    var cls = 'loot-ico' + (extraClass ? ' ' + extraClass : '');
+    return '<span class="' + cls + '" aria-hidden="true">' + esc(icon || '🎁') + '</span>';
+  }
+
+  function statNames() {
+    return model && model.loot && model.loot.stats.length ? model.loot.stats : ['攻擊', '魔力', '防禦', '敏捷', '幸運'];
+  }
+
+  function statLine(stats) {
+    var parts = [];
+    statNames().forEach(function (name) {
+      var amount = stats && stats[name] ? stats[name] : 0;
+      if (amount) parts.push(esc(name) + ' +' + amount);
+    });
+    return parts.join('　');
+  }
+
+  function statPills(stats) {
+    return '<ul class="stat-pills">' + statNames().map(function (name) {
+      var amount = stats && stats[name] ? stats[name] : 0;
+      return '<li class="' + (amount ? 'is-on' : 'is-zero') + '"><span>' + esc(name) +
+        '</span><b class="num">+' + amount + '</b></li>';
+    }).join('') + '</ul>';
+  }
+
+  function gearState() {
+    var bag = lootBag();
+    if (!bag || !model.loot || typeof globalThis.SpotsLoot === 'undefined') return null;
+    var owned = [];
+    Object.keys(bag.owned).forEach(function (id) { owned.push(bag.owned[id].item); });
+    var stored = readLootGear();
+    var resolved = globalThis.SpotsLoot.resolveGear(model.loot, owned, stored);
+    var dirty = false;
+    globalThis.SpotsLoot.SLOTS.forEach(function (slot) {
+      if (!resolved[slot].cleared) return;
+      stored[slot] = { id: resolved[slot].item ? resolved[slot].item.id : '', manual: false };
+      dirty = true;
+    });
+    if (dirty) writeLootGear(stored);
+    var equipped = [];
+    var consumables = [];
+    owned.forEach(function (item) {
+      if (item.category === 'consumable') consumables.push(item);
+    });
+    globalThis.SpotsLoot.SLOTS.forEach(function (slot) {
+      if (resolved[slot].item) equipped.push(resolved[slot].item);
+    });
+    var names = statNames();
+    return {
+      bag: bag,
+      resolved: resolved,
+      equippedStats: globalThis.SpotsLoot.sumStats(equipped, names),
+      pocketStats: globalThis.SpotsLoot.sumStats(consumables, names),
+      totals: globalThis.SpotsLoot.sumStats(equipped.concat(consumables), names)
+    };
+  }
+
+  function ownedInSlot(bag, slot) {
+    var list = [];
+    Object.keys(bag.owned).forEach(function (id) {
+      var item = bag.owned[id].item;
+      if (item.slot === slot) list.push(item);
+    });
+    return globalThis.SpotsLoot.sortedByPower(list);
+  }
+
+  function slotLabel(slot) {
+    if (slot === 'weapon') return '武器';
+    if (slot === 'magic') return '魔法';
+    return '防具';
+  }
+
+  function gearSection() {
+    var view = gearState();
+    if (!view) return '';
+    var slots = globalThis.SpotsLoot.SLOTS.map(function (slot) {
+      var row = view.resolved[slot];
+      var item = row.item;
+      var open = state.gearOpen === slot;
+      var label = slotLabel(slot);
+      var body = item
+        ? lootIconHtml(item.icon) +
+          '<span class="gear-copy"><span class="gear-k">' + label + (row.manual ? '・手動' : '') +
+          '</span><span class="gear-name">' + esc(item.name) + '</span><span class="gear-bonus">' +
+          (statLine(item.stats) || '沒有加成') + '</span></span>'
+        : '<span class="loot-ico is-sil" aria-hidden="true">🎁</span><span class="gear-copy"><span class="gear-k">' +
+          label + '</span><span class="gear-name is-empty">尚未入手</span></span>';
+      return '<button type="button" class="gear-slot' + (item ? ' ' + rarityClass(item.rarity) : ' is-empty') +
+        (open ? ' is-open' : '') + '" data-gear="' + slot + '" aria-expanded="' + (open ? 'true' : 'false') + '">' +
+        body + '</button>';
+    }).join('');
+    var picker = '';
+    if (state.gearOpen && globalThis.SpotsLoot.SLOTS.indexOf(state.gearOpen) >= 0) {
+      var slot = state.gearOpen;
+      var choices = ownedInSlot(view.bag, slot);
+      var current = view.resolved[slot];
+      var label = slotLabel(slot);
+      if (!choices.length) {
+        picker = '<div class="gear-picker"><p class="gear-empty">這格還在等第一件' + label + '。先去完成景點吧。</p></div>';
+      } else {
+        var auto = current.manual
+          ? '<button type="button" class="gear-auto" data-gear-auto="' + slot + '">換回自動，穿最好的</button>'
+          : '<p class="gear-auto-note">現在自動穿著最好的一件。點下面可以改穿別的。</p>';
+        var buttons = choices.map(function (item) {
+          var on = current.item && current.item.id === item.id;
+          return '<button type="button" class="gear-choice ' + rarityClass(item.rarity) + (on ? ' is-on' : '') +
+            '" data-equip="' + esc(item.id) + '" data-slot="' + slot + '" aria-pressed="' + (on ? 'true' : 'false') + '">' +
+            lootIconHtml(item.icon) + '<span class="gear-choice-copy"><b>' + esc(item.name) + '</b><small>' +
+            esc(item.rarityName) + (statLine(item.stats) ? '・' + statLine(item.stats) : '') + '</small></span></button>';
+        }).join('');
+        picker = '<div class="gear-picker" role="group" aria-label="選擇' + label + '">' + auto + buttons + '</div>';
+      }
+    }
+    var pocket = statLine(view.pocketStats);
+    var equipped = statLine(view.equippedStats);
+    var split = (equipped || pocket)
+      ? '<p class="gear-split">' +
+        (equipped ? '<span>裝備 ' + equipped + '</span>' : '') +
+        (pocket ? '<span>口袋 ' + pocket + '</span>' : '') + '</p>'
+      : '';
+    var any = false;
+    statNames().forEach(function (name) { if (view.totals[name]) any = true; });
+    var totalHtml = any
+      ? statPills(view.totals) + split
+      : '<p class="gear-empty">能力合計還沒有加成，背包裡的風很大。</p>';
+    return '<div class="sheet-gear"><p class="kicker">裝備</p><div class="gear-slots">' + slots +
+      '</div>' + picker + '<p class="gear-total-k">能力合計</p>' + totalHtml + '</div>';
+  }
+
+  function codexHtml() {
+    var bag = lootBag();
+    if (!bag || !model.loot || !model.loot.items.length) return '';
+    var summary = bag.summary;
+    var counts = { all: { owned: summary.owned, total: summary.total } };
+    model.loot.categories.forEach(function (cat) {
+      counts[cat.id] = { owned: 0, total: 0 };
+    });
+    model.loot.items.forEach(function (item) {
+      if (!counts[item.category]) return;
+      counts[item.category].total += 1;
+      if (bag.owned[item.id]) counts[item.category].owned += 1;
+    });
+    var cats = [{ id: 'all', name: '全部' }].concat(model.loot.categories);
+    var chips = cats.map(function (cat) {
+      var on = state.codex === cat.id;
+      var count = counts[cat.id] || { owned: 0, total: 0 };
+      return '<button type="button" class="chip' + (on ? ' is-on' : '') + '" data-codex="' + esc(cat.id) +
+        '" aria-pressed="' + (on ? 'true' : 'false') + '">' + esc(cat.name) +
+        ' <span class="num">' + count.owned + '/' + count.total + '</span></button>';
+    }).join('');
+    var rarityBits = model.loot.rarities.map(function (row) {
+      var stat = summary.rarity[row.id] || { owned: 0, total: 0, name: row.name };
+      return '<li class="' + rarityClass(row.id) + '"><span>' + esc(stat.name || row.name) + '</span><b class="num">' +
+        stat.owned + '/' + stat.total + '</b></li>';
+    }).join('');
+    var view = gearState();
+    var equipped = {};
+    if (view) {
+      globalThis.SpotsLoot.SLOTS.forEach(function (slot) {
+        if (view.resolved[slot].item) equipped[view.resolved[slot].item.id] = true;
+      });
+    }
+    var cells = model.loot.items.filter(function (item) {
+      return state.codex === 'all' || item.category === state.codex;
+    }).map(function (item) {
+      var owned = bag.owned[item.id];
+      if (!owned) {
+        return '<li><div class="loot-cell is-locked"><span class="sr-only">未入手，' + esc(item.categoryName) +
+          '</span><span class="loot-frame">' + lootIconHtml(item.icon, 'is-sil') +
+          '<span class="loot-lock">' + LOCK_SVG + '</span></span><span class="loot-name" aria-hidden="true">' +
+          HIDDEN_MARK + '</span><span class="loot-meta" aria-hidden="true">' + esc(item.categoryName) +
+          '</span></div></li>';
+      }
+      var on = !!equipped[item.id];
+      var inner = '<span class="loot-frame">' + lootIconHtml(item.icon) + '</span><span class="loot-name">' +
+        esc(item.name) + '</span><span class="loot-meta">' + esc(item.rarityName) + '・' + esc(item.categoryName) +
+        (on ? '・裝備中' : '') + '</span>' +
+        (statLine(item.stats) ? '<span class="loot-stats">' + statLine(item.stats) + '</span>' : '') +
+        (item.description ? '<span class="loot-desc">' + esc(item.description) + '</span>' : '');
+      if (item.slot) {
+        return '<li><button type="button" class="loot-cell is-owned ' + rarityClass(item.rarity) +
+          (on ? ' is-equipped' : '') + '" data-equip="' + esc(item.id) + '" data-slot="' + item.slot +
+          '" aria-pressed="' + (on ? 'true' : 'false') + '">' + inner + '</button></li>';
+      }
+      return '<li><div class="loot-cell is-owned ' + rarityClass(item.rarity) + '">' + inner + '</div></li>';
+    }).join('');
+    return '<section class="codex" id="loot-codex" aria-labelledby="codex-title"><div class="sec-h"><h2 id="codex-title">戰利品圖鑑</h2><span class="num">已入手 ' +
+      summary.owned + ' / ' + summary.total + '</span></div>' +
+      '<p class="wall-lead">完成的景點、討伐的魔王、打開的寶箱都會掉東西。同一進度在每台裝置、每次雲端掃描算出來都一樣。入手的亮出名號，還沒掉到的先鎖成剪影。武器、魔法、防具可以穿上；消耗品進口袋就直接加進能力。</p>' +
+      '<ul class="rarity-counts">' + rarityBits + '</ul>' +
+      '<div class="chips" role="toolbar" aria-label="圖鑑分類">' + chips + '</div>' +
+      '<ul class="loot-grid">' + cells + '</ul></section>';
+  }
+
+  function dropPlace(drop) {
+    if (drop.kind === 'spot') return drop.city + '・' + drop.ward + '・' + drop.name;
+    if (drop.kind === 'boss') {
+      var boss = bossName(drop.city, drop.ward);
+      return drop.city + '・' + drop.ward + (boss ? '・' + boss : '');
+    }
+    return drop.achievementName || '寶箱';
+  }
+
+  function kindKicker(kind) {
+    if (kind === 'boss') return '魔王討伐';
+    if (kind === 'achievement') return '寶箱加碼';
+    return '景點掉落';
+  }
+
+  function dismissLoot() {
+    lootQueue.shift();
+    if (lootNode && lootNode.parentNode) lootNode.parentNode.removeChild(lootNode);
+    lootNode = null;
+    if (lootQueue.length) paintLoot();
+  }
+
+  function paintLoot() {
+    if (lootNode && lootNode.parentNode) lootNode.parentNode.removeChild(lootNode);
+    lootNode = null;
+    if (!lootQueue.length || typeof document === 'undefined') return;
+    var drop = lootQueue[0];
+    var item = drop.item;
+    var bag = lootBag();
+    var count = bag && bag.owned[item.id] ? bag.owned[item.id].count : 1;
+    var dup = count > 1 ? '<p class="loot-dup">圖鑑裡已經有一件，再收一次也不會壞。</p>' : '';
+    var extra = drop.extra ? '<p class="loot-dup">另外 ' + drop.extra + ' 件也一併收進圖鑑了。</p>' : '';
+    var pending = lootQueue.length - 1;
+    var button = pending > 0 ? '看下一件' : '收進圖鑑';
+    var more = pending > 0 ? '<p class="loot-more">後面還有 ' + pending + ' 件</p>' : '';
+    lootNode = document.createElement('div');
+    lootNode.className = 'loot-reveal ' + rarityClass(item.rarity);
+    lootNode.setAttribute('role', 'dialog');
+    lootNode.setAttribute('aria-modal', 'true');
+    lootNode.setAttribute('aria-labelledby', 'loot-reveal-title');
+    lootNode.innerHTML =
+      '<div class="loot-stage"><div class="loot-anim" aria-hidden="true"><div class="loot-glow"></div>' +
+      '<div class="loot-chest"><div class="loot-lid"></div><div class="loot-box"><i></i></div></div></div>' +
+      '<article class="loot-card"><p class="loot-kicker">' + esc(kindKicker(drop.kind)) + '・' + esc(item.rarityName) +
+      '</p>' + lootIconHtml(item.icon, 'is-drop') + '<h2 id="loot-reveal-title">' + esc(item.name) +
+      '</h2><p class="loot-place">' + esc(dropPlace(drop)) + '</p>' +
+      (item.description ? '<p class="loot-desc">' + esc(item.description) + '</p>' : '') +
+      (statLine(item.stats) ? '<p class="loot-stats">' + statLine(item.stats) + '</p>' : '') +
+      dup + extra + '<button type="button" class="loot-take" data-loot-close>' + button + '</button>' +
+      more + '</article></div>';
+    document.body.appendChild(lootNode);
+    var btn = lootNode.querySelector('[data-loot-close]');
+    if (btn) {
+      try { btn.focus({ preventScroll: true }); } catch (err) { btn.focus(); }
+    }
+  }
+
+  function queueReveals(fresh) {
+    var ranked = fresh.map(function (drop, index) {
+      return { drop: drop, index: index, rank: drop.item.rarityRank || 0 };
+    }).sort(function (a, b) {
+      if (b.rank !== a.rank) return b.rank - a.rank;
+      return a.index - b.index;
+    });
+    var shown = ranked.slice(0, 4).map(function (row) { return row.drop; });
+    var hidden = ranked.length - shown.length;
+    if (hidden > 0 && shown.length) {
+      var last = shown[shown.length - 1];
+      shown[shown.length - 1] = {
+        source: last.source,
+        kind: last.kind,
+        item: last.item,
+        city: last.city,
+        ward: last.ward,
+        cat: last.cat,
+        name: last.name,
+        achievementName: last.achievementName,
+        extra: (last.extra || 0) + hidden
+      };
+    }
+    var was = lootQueue.length;
+    lootQueue = lootQueue.concat(shown);
+    if (!was) paintLoot();
+  }
+
+  function maybeLoot() {
+    if (!model || typeof document === 'undefined') return;
+    var bag = lootBag();
+    if (!bag) return;
+    var active = {};
+    bag.drops.forEach(function (drop) { active[drop.source] = drop; });
+    var ids = readLootSeen();
+    if (!ids) {
+      var seed = {};
+      Object.keys(active).forEach(function (id) { seed[id] = 1; });
+      writeLootSeen(seed);
+      return;
+    }
+    var dirty = false;
+    Object.keys(ids).forEach(function (id) {
+      if (!active[id]) {
+        delete ids[id];
+        dirty = true;
+      }
+    });
+    var fresh = [];
+    bag.drops.forEach(function (drop) {
+      if (ids[drop.source]) return;
+      fresh.push(drop);
+      ids[drop.source] = 1;
+      dirty = true;
+    });
+    if (dirty) writeLootSeen(ids);
+    if (fresh.length) queueReveals(fresh);
+  }
+
+  function rerenderKeepScroll() {
+    var y = window.scrollY || window.pageYOffset || 0;
+    render();
+    window.scrollTo(0, y);
+  }
+
   function renderHome() {
     document.title = '景點拍照進度';
     var rows = rowsOf();
@@ -1173,9 +1595,10 @@
       noteBlock('請將照片上傳到 Google Drive 資料夾「物件景點／城市／區」，並使用建議檔名。同一景點最多三張，尾碼為 01、02、03。勾選會立刻加經驗，也算完成這個景點，畫面上寫待確認；雲端偵測到才亮綠燈，標成雲端認證。兩邊的經驗加在一起。取消勾選、又還沒被雲端拍到，稱號、魔王和寶箱會鎖回去。勾選只存在這台裝置。') +
       '</div>' +
       '<div class="sec-h"><h2>副本</h2><span>' + model.wards.length + ' 座</span></div>' +
-      '<p class="wall-lead">每個區是一座副本。三分之一收小怪，三分之二打精英，全部清完才看得到魔王的名字，並掉落該區稱號。</p>' +
+      '<p class="wall-lead">每個區是一座副本。三分之一收小怪，三分之二打精英，全部清完才看得到魔王的名字，並掉落該區稱號。每完成一個景點會再掉一件戰利品，同一景點在每台裝置算出來都一樣。</p>' +
       '<ol class="wards">' + items + '</ol>' +
       chestHtml(score) +
+      codexHtml() +
       wallHtml(rows);
   }
 
@@ -1239,6 +1662,18 @@
       var count = slots.filter(Boolean).length;
       var hit = count > 0;
       var pending = ticks.some(Boolean) && !hit;
+      var lootHtml = '';
+      if ((hit || ticks.some(Boolean)) && typeof globalThis.SpotsLoot !== 'undefined') {
+        var bag = lootBag();
+        if (bag) {
+          var sid = globalThis.SpotsLoot.sourceId('spot', [ward.city, ward.ward, spot.cat, spot.name]);
+          var found = bag.bySource[sid];
+          if (found) {
+            lootHtml = '<span class="spot-loot ' + rarityClass(found.item.rarity) + '">掉落 ' +
+              esc(found.item.name) + '</span>';
+          }
+        }
+      }
       var hidden = state.cat !== 'all' && state.cat !== spot.cat;
       var file = suggestName(ward.ward, spot.cat, spot.name);
       var boxes = SLOTS.map(function (slot, slotIndex) {
@@ -1255,7 +1690,7 @@
       return '<tr class="spot' + (hidden ? ' is-hide' : '') + (pending ? ' has-pending' : '') + '" data-key="' + esc(key) + '" data-cat="' +
         esc(spot.cat) + '" data-hit="' + (hit ? '1' : '0') + '">' +
         '<td class="td-cat"><span class="cat">' + esc(spot.cat) + '</span></td>' +
-        '<td class="td-name"><span class="spot-name">' + esc(spot.name) + '</span></td>' +
+        '<td class="td-name"><span class="spot-name">' + esc(spot.name) + '</span>' + lootHtml + '</td>' +
         '<td class="td-file"><span class="cell-k">建議檔名</span><div class="fname"><code>' + esc(file).replace(/_01\.jpg$/, '<wbr>_01.jpg') +
         '</code><button type="button" class="copy" data-copy="' + esc(file) + '">複製</button></div></td>' +
         '<td class="td-ticks"><span class="cell-k">自行勾選</span><div class="ticks">' + boxes + '</div></td>' +
@@ -1297,7 +1732,7 @@
       (ward.spots.length || prog.synthetic
         ? progressCard(ward.ward + '進度', prog.done, prog.total, true, { cloud: prog.cloudDone, pending: prog.pendingDone })
         : '') +
-      noteBlock('請上傳到 Google Drive「' + esc(folder) + '」，並使用建議檔名。勾選立刻 +3 XP，也算這個景點完成，燈號會寫待確認。雲端拍到才是雲端認證。取消勾選、雲端又還沒有照片，這座副本的稱號會鎖回去。') +
+      noteBlock('請上傳到 Google Drive「' + esc(folder) + '」，並使用建議檔名。勾選立刻 +3 XP，也算這個景點完成，燈號會寫待確認。雲端拍到才是雲端認證。取消勾選、雲端又還沒有照片，這座副本的稱號會鎖回去。完成的景點會掉一件戰利品，取消後若雲端也沒有照片，那件掉落會鎖回去。') +
       '</div>' +
       body;
   }
@@ -1519,10 +1954,51 @@
     }, 1600);
   }
 
+  function onKey(event) {
+    if (event.key === 'Escape' && lootQueue.length) {
+      event.preventDefault();
+      dismissLoot();
+    }
+  }
+
   function onClick(event) {
+    if (lootNode && event.target === lootNode) {
+      dismissLoot();
+      return;
+    }
+    var lootClose = event.target.closest('[data-loot-close]');
+    if (lootClose) {
+      dismissLoot();
+      return;
+    }
     var closeBtn = event.target.closest('[data-toast-close]');
     if (closeBtn) {
       dismissToast(closeBtn.closest('.toast'));
+      return;
+    }
+    var autoBtn = event.target.closest('[data-gear-auto]');
+    if (autoBtn) {
+      setGearSlot(autoBtn.getAttribute('data-gear-auto'), '', false);
+      rerenderKeepScroll();
+      return;
+    }
+    var equipBtn = event.target.closest('[data-equip]');
+    if (equipBtn) {
+      setGearSlot(equipBtn.getAttribute('data-slot'), equipBtn.getAttribute('data-equip'), true);
+      rerenderKeepScroll();
+      return;
+    }
+    var gearBtn = event.target.closest('[data-gear]');
+    if (gearBtn) {
+      var slot = gearBtn.getAttribute('data-gear');
+      state.gearOpen = state.gearOpen === slot ? '' : slot;
+      rerenderKeepScroll();
+      return;
+    }
+    var codexBtn = event.target.closest('button[data-codex]');
+    if (codexBtn) {
+      state.codex = codexBtn.getAttribute('data-codex') || 'all';
+      rerenderKeepScroll();
       return;
     }
     var copyBtn = event.target.closest('button[data-copy]');
@@ -1577,9 +2053,11 @@
       var app = document.getElementById('app');
       if (!app) return;
       document.addEventListener('click', onClick);
+      document.addEventListener('keydown', onKey);
       app.addEventListener('change', onChange);
       window.addEventListener('hashchange', function () {
         state.cat = 'all';
+        state.gearOpen = '';
         render();
         window.scrollTo(0, 0);
       });

@@ -4,6 +4,10 @@
   var SLOTS = ['01', '02', '03'];
   var EXT_RE = /^(.*)\.(jpe?g|png|heic)$/i;
   var LS_KEY = 'rakuhome-spots-ticks-v1';
+  var TICK_AT_KEY = 'rakuhome-spots-tick-at-v1';
+  var CLOUD_SEEN_KEY = 'rakuhome-spots-cloud-seen-v1';
+  var EQUIP_KEY = 'rakuhome-spots-equip-v1';
+  var EQUIP_KEY_DEMO = 'rakuhome-spots-equip-demo-v1';
   var SEEN_KEY = 'rakuhome-spots-titles-seen-v1';
   var SEEN_KEY_DEMO = 'rakuhome-spots-titles-seen-demo-v1';
   var DEMO_TIER = {
@@ -66,6 +70,14 @@
     return nfc(ward) + '_' + nfc(cat) + '_' + nfc(name) + '_01.jpg';
   }
 
+  function asFile(file) {
+    if (typeof globalThis !== 'undefined' && globalThis.SpotsRpg && typeof globalThis.SpotsRpg.asFile === 'function') {
+      return globalThis.SpotsRpg.asFile(file);
+    }
+    if (typeof file === 'string') return { name: file, day: '' };
+    return null;
+  }
+
   function analyze(ward, spots, files) {
     var list = Array.isArray(spots) ? spots : [];
     var stemToSpot = new Map();
@@ -79,16 +91,21 @@
     });
 
     var found = list.map(function () { return [false, false, false]; });
+    var days = list.map(function () { return ['', '', '']; });
     var unmatched = [];
     var seen = new Set();
     (Array.isArray(files) ? files : []).forEach(function (file) {
-      if (typeof file !== 'string') return;
-      var base = basename(file);
+      var entry = asFile(file);
+      if (!entry) return;
+      var base = basename(entry.name);
       if (!base) return;
       var match = base.match(EXT_RE);
       var hit = match ? stemToSpot.get(fold(match[1].trim())) : null;
       if (hit) {
         found[hit.index][hit.slotIndex] = true;
+        var day = entry.day || '';
+        var prev = days[hit.index][hit.slotIndex];
+        if (day && (!prev || day < prev)) days[hit.index][hit.slotIndex] = day;
         return;
       }
       if (!seen.has(base)) {
@@ -98,7 +115,7 @@
     });
 
     var done = found.filter(function (slots) { return slots.some(Boolean); }).length;
-    return { found: found, unmatched: unmatched, done: done, total: list.length };
+    return { found: found, days: days, unmatched: unmatched, done: done, total: list.length };
   }
 
   function spotKey(city, ward, cat, name) {
@@ -163,6 +180,25 @@
     return cur;
   }
 
+  function readTickAt() {
+    try {
+      var raw = localStorage.getItem(TICK_AT_KEY);
+      var data = raw ? JSON.parse(raw) : {};
+      return data && typeof data === 'object' ? data : {};
+    } catch (err) {
+      return {};
+    }
+  }
+
+  function tickAtFor(key) {
+    var all = readTickAt();
+    var cur = [null, null, null];
+    if (Array.isArray(all[key])) {
+      for (var i = 0; i < 3; i++) cur[i] = all[key][i] || null;
+    }
+    return cur;
+  }
+
   function writeTick(key, index, checked) {
     var all = readTicks();
     var cur = ticksFor(key);
@@ -170,7 +206,70 @@
     if (cur.some(Boolean)) all[key] = cur;
     else delete all[key];
     try { localStorage.setItem(LS_KEY, JSON.stringify(all)); } catch (err) {}
+
+    var ats = readTickAt();
+    var row = tickAtFor(key).slice();
+    if (checked) {
+      if (!row[index]) row[index] = new Date().toISOString();
+    } else {
+      row[index] = null;
+    }
+    if (row.some(Boolean)) ats[key] = row;
+    else delete ats[key];
+    try { localStorage.setItem(TICK_AT_KEY, JSON.stringify(ats)); } catch (err) {}
     return cur;
+  }
+
+  function readJsonStore(key) {
+    try {
+      var raw = localStorage.getItem(key);
+      var data = raw ? JSON.parse(raw) : null;
+      return data && typeof data === 'object' ? data : null;
+    } catch (err) {
+      return null;
+    }
+  }
+
+  function fileId(city, ward, name) {
+    return wardKey(city, ward) + '\n' + basename(name);
+  }
+
+  function syncCloudSeen() {
+    if (!model || model.demo) return {};
+    var stored = readJsonStore(CLOUD_SEEN_KEY) || { seeded: false, stamp: '', files: {} };
+    if (!stored.files || typeof stored.files !== 'object') stored.files = {};
+    var stamp = '';
+    if (typeof globalThis.SpotsRpg !== 'undefined') stamp = globalThis.SpotsRpg.normalizeDay(model.updated) || '';
+    var current = {};
+    model.wards.forEach(function (ward) {
+      filesFor(ward).forEach(function (file) {
+        var entry = asFile(file);
+        if (!entry) return;
+        current[fileId(ward.city, ward.ward, entry.name)] = entry.day || '';
+      });
+    });
+    if (!stored.seeded) {
+      stored = { seeded: true, stamp: stamp, files: {} };
+      Object.keys(current).forEach(function (id) { stored.files[id] = current[id] || ''; });
+    } else {
+      var changedStamp = Boolean(stamp) && stamp !== (stored.stamp || '');
+      Object.keys(current).forEach(function (id) {
+        if (Object.prototype.hasOwnProperty.call(stored.files, id)) {
+          if (current[id]) stored.files[id] = current[id];
+          return;
+        }
+        if (current[id]) stored.files[id] = current[id];
+        else if (changedStamp) stored.files[id] = stamp;
+        else stored.files[id] = '';
+      });
+      Object.keys(stored.files).forEach(function (id) {
+        if (!Object.prototype.hasOwnProperty.call(current, id)) delete stored.files[id];
+      });
+      stored.stamp = stamp || stored.stamp || '';
+      stored.seeded = true;
+    }
+    try { localStorage.setItem(CLOUD_SEEN_KEY, JSON.stringify(stored)); } catch (err) {}
+    return stored.files;
   }
 
   function tierCount(done, total) {
@@ -404,26 +503,138 @@
     return Array.isArray(list) ? list : [];
   }
 
+  function filesForAnalyze(ward) {
+    var seen = model && model.cloudSeen ? model.cloudSeen : {};
+    var scan = model && model.scanIndex ? model.scanIndex : {};
+    return filesFor(ward).map(function (file) {
+      var entry = asFile(file);
+      if (!entry) return null;
+      var id = fileId(ward.city, ward.ward, entry.name);
+      if (!entry.day) entry.day = scan[id] || seen[id] || '';
+      return { name: entry.name, day: entry.day };
+    }).filter(Boolean);
+  }
+
+  function indexScans(scans) {
+    var map = {};
+    if (typeof globalThis.SpotsRpg === 'undefined') return map;
+    (Array.isArray(scans) ? scans : []).forEach(function (scan) {
+      if (!scan || !scan.files || typeof scan.files !== 'object') return;
+      var day = globalThis.SpotsRpg.normalizeDay(scan.at || scan.date || scan.updated);
+      Object.keys(scan.files).forEach(function (key) {
+        (Array.isArray(scan.files[key]) ? scan.files[key] : []).forEach(function (file) {
+          var entry = asFile(file);
+          if (!entry) return;
+          var parts = String(key).split('/');
+          if (parts.length < 2) return;
+          var id = fileId(parts[0], parts.slice(1).join('/'), entry.name);
+          var fileDay = entry.day || day;
+          if (!fileDay) return;
+          if (!map[id] || fileDay < map[id]) map[id] = fileDay;
+        });
+      });
+    });
+    return map;
+  }
+
+  function enrichDemo(wards, files) {
+    var day = '2026-11-02';
+    var out = {};
+    Object.keys(files || {}).forEach(function (key) {
+      out[key] = (Array.isArray(files[key]) ? files[key] : []).map(function (name) {
+        return { name: name, date: day };
+      });
+    });
+    (Array.isArray(wards) ? wards : []).forEach(function (ward) {
+      if (ward.city !== '東京' || ward.ward !== '港區') return;
+      var key = wardKey(ward.city, ward.ward);
+      var extra = [];
+      ward.spots.slice(0, 12).forEach(function (spot) {
+        ['02', '03'].forEach(function (slot) {
+          extra.push({
+            name: nfc(ward.ward) + '_' + nfc(spot.cat) + '_' + nfc(spot.name) + '_' + slot + '.jpg',
+            date: day
+          });
+        });
+      });
+      out[key] = (out[key] || []).concat(extra);
+    });
+    return out;
+  }
+
   function progressFor(ward) {
-    var stat = analyze(ward.ward, ward.spots, filesFor(ward));
+    var stat = analyze(ward.ward, ward.spots, filesForAnalyze(ward));
     var key = wardKey(ward.city, ward.ward);
+    var spots = ward.spots.map(function (spot, index) {
+      var spotId = spotKey(ward.city, ward.ward, spot.cat, spot.name);
+      var ticks = ticksFor(spotId);
+      var cloud = stat.found[index] || [false, false, false];
+      var cloudOn = cloud.some(Boolean);
+      var tickOn = ticks.some(Boolean);
+      return {
+        cat: spot.cat,
+        name: spot.name,
+        key: spotId,
+        cloud: cloud,
+        ticks: ticks,
+        cloudDays: stat.days[index] || ['', '', ''],
+        tickDays: tickAtFor(spotId),
+        cloudComplete: cloudOn,
+        pending: tickOn && !cloudOn,
+        complete: cloudOn || tickOn
+      };
+    });
+    var done = spots.filter(function (spot) { return spot.complete; }).length;
+    var cloudDone = spots.filter(function (spot) { return spot.cloudComplete; }).length;
+    var pendingDone = spots.filter(function (spot) { return spot.pending; }).length;
     if (model.synthetic && model.synthetic[key] && stat.total === 0) {
       var syn = model.synthetic[key];
       return {
         done: syn.done,
         total: syn.total,
+        cloudDone: syn.done,
+        pendingDone: 0,
         found: stat.found,
+        days: stat.days,
         unmatched: stat.unmatched,
+        spots: spots,
         synthetic: true
       };
     }
     return {
-      done: stat.done,
+      done: done,
       total: stat.total,
+      cloudDone: cloudDone,
+      pendingDone: pendingDone,
       found: stat.found,
+      days: stat.days,
       unmatched: stat.unmatched,
+      spots: spots,
       synthetic: false
     };
+  }
+
+  function scoreNow() {
+    if (!model || !model.rpg || typeof globalThis.SpotsRpg === 'undefined') return null;
+    var report = {
+      wards: model.wards.map(function (ward) {
+        var prog = progressFor(ward);
+        return {
+          city: ward.city,
+          ward: ward.ward,
+          spots: prog.spots.map(function (spot) {
+            return {
+              cat: spot.cat,
+              cloud: spot.cloud,
+              ticks: spot.ticks,
+              cloudDays: spot.cloudDays,
+              tickDays: spot.tickDays
+            };
+          })
+        };
+      })
+    };
+    return globalThis.SpotsRpg.evaluate(model.rpg, report);
   }
 
   function load() {
@@ -439,6 +650,7 @@
     var wardsReq = getJson('data/wards.json');
     var statusReq = getJson('data/status.json');
     var titlesReq = getJson('data/titles.json');
+    var rpgReq = getJson('data/rpg.json');
 
     Promise.all([
       wardsReq,
@@ -451,31 +663,45 @@
         return { json: json, error: false };
       }, function () {
         return { json: null, error: true };
+      }),
+      rpgReq.then(function (json) {
+        return { json: json, error: false };
+      }, function () {
+        return { json: null, error: true };
       })
     ]).then(function (loaded) {
       var wardsJson = loaded[0];
       var statusWrap = loaded[1];
       var titlesWrap = loaded[2];
+      var rpgWrap = loaded[3];
       var wards = Array.isArray(wardsJson && wardsJson.wards) ? wardsJson.wards.map(normWard) : [];
       var statusJson = statusWrap.json || {};
       model = {
         wards: wards,
         updated: Object.prototype.hasOwnProperty.call(statusJson, 'updated') ? statusJson.updated : null,
         files: statusJson.files && typeof statusJson.files === 'object' ? statusJson.files : {},
+        scans: Array.isArray(statusJson.scans) ? statusJson.scans : [],
         statusError: statusWrap.error,
         titlesError: titlesWrap.error,
         titles: titlesWrap.error ? null : normTitles(titlesWrap.json),
+        rpgError: rpgWrap.error || typeof globalThis.SpotsRpg === 'undefined',
+        rpg: rpgWrap.error || typeof globalThis.SpotsRpg === 'undefined' ? null : globalThis.SpotsRpg.normConfig(rpgWrap.json),
         synthetic: null,
-        demo: false
+        demo: false,
+        scanIndex: {},
+        cloudSeen: {}
       };
       if (isDemo()) {
         var plan = planDemo(model.wards);
         model.demo = true;
         model.updated = '示範模式';
-        model.files = plan.files;
+        model.files = enrichDemo(model.wards, plan.files);
         model.synthetic = plan.synthetic;
+        model.scans = [];
         model.statusError = false;
       }
+      model.scanIndex = indexScans(model.scans);
+      model.cloudSeen = syncCloudSeen();
       if (document.body) document.body.classList.toggle('is-demo', model.demo);
       render();
     }).catch(function () {
@@ -511,21 +737,43 @@
     if (model.titlesError) {
       html += '<p class="banner">稱號資料讀取失敗，徽章暫時無法顯示。</p>';
     }
+    if (model.rpgError) {
+      html += '<p class="banner">冒險資料讀取失敗，等級暫時無法顯示。</p>';
+    }
     return html;
   }
 
-  function progressCard(kicker, done, total, showUpdated) {
+  function splitBar(done, total, cloud, pending) {
+    var cloudW = total ? (cloud / total) * 100 : 0;
+    var pendW = total ? (pending / total) * 100 : 0;
+    return '<span class="is-cloud" style="width:' + cloudW + '%"></span>' +
+      '<span class="is-pending" style="width:' + pendW + '%"></span>';
+  }
+
+  function splitCount(cloud, pending) {
+    return '<p class="split-count"><span class="is-cloud">雲端認證 ' + cloud + '</span>' +
+      '<span class="is-pending">待確認 ' + pending + '</span></p>';
+  }
+
+  function progressCard(kicker, done, total, showUpdated, parts) {
+    var cloud = parts ? parts.cloud : done;
+    var pending = parts ? parts.pending : 0;
     var width = total ? (done / total) * 100 : 0;
     var updated = showUpdated
       ? '<div class="updated"><span>最後偵測時間</span><strong>' + esc(formatUpdated(model.updated)) + '</strong></div>'
       : '';
+    var bar = parts ? splitBar(done, total, cloud, pending) : '<span style="width:' + width + '%"></span>';
+    var split = parts ? splitCount(cloud, pending) : '';
+    var label = parts
+      ? kicker + '，完成 ' + done + '，雲端認證 ' + cloud + '，待確認 ' + pending
+      : kicker;
     return '<section class="hero-card">' + updated +
       '<div class="overall"><div><p class="kicker">' + esc(kicker) + '</p>' +
       '<p class="big num"><b>' + done + '</b><span>/ ' + total + '</span></p></div>' +
       '<p class="pct num">' + pct(done, total) + '%</p></div>' +
-      '<div class="bar lg" role="progressbar" aria-valuemin="0" aria-valuemax="' + total + '" aria-valuenow="' + done + '" aria-label="' + esc(kicker) + '">' +
-      '<span style="width:' + width + '%"></span></div>' +
-      '<p class="hint">至少偵測到一張照片，這個景點即算完成。稱號只看燈號，自行勾選不計入。</p></section>';
+      '<div class="bar lg" role="progressbar" aria-valuemin="0" aria-valuemax="' + total + '" aria-valuenow="' + done + '" aria-label="' + esc(label) + '">' +
+      bar + '</div>' + split +
+      '<p class="hint">勾一下立刻 +3，也算完成這個景點，標成待確認。雲端第一張 +10，多拍的每一張再 +5，燈號轉綠就是雲端認證。兩邊經驗加在一起，稱號、魔王和寶箱也是。</p></section>';
   }
 
   function noteBlock(text) {
@@ -566,20 +814,32 @@
     var real = opts.title || '';
     var secret = !opts.on && isHiddenWhenLocked(opts.scope, opts.tier) && real && real !== '尚未設定';
     var teaser = !opts.on && !secret;
+    var pending = !!opts.on && opts.cert === 'pending';
     var cls = 'badge scope-' + opts.scope +
       (opts.tier ? ' tier-' + opts.tier : '') +
       (opts.on ? ' is-on' : ' is-locked') +
       (secret ? ' is-secret' : '') +
-      (teaser ? ' is-teaser' : '');
+      (teaser ? ' is-teaser' : '') +
+      (pending ? ' is-pending-tier' : '');
     var state = opts.on ? '已解鎖' : '未解鎖';
+    if (opts.on && opts.cert === 'pending') state += '，待確認';
+    else if (opts.on && opts.cert === 'cloud') state += '，雲端認證';
     var shown = secret ? HIDDEN_MARK : real;
     var icon = secret ? lockMedalHtml() : medalHtml(opts.icon, opts.scope, opts.tier, !!opts.on);
     var lock = (!opts.on && !secret) ? LOCK_SVG : '';
+    var cert = '';
+    if (opts.on && opts.cert === 'pending') cert = '待確認 · ';
+    else if (opts.on && opts.cert === 'cloud') cert = '雲端認證 · ';
     return '<li class="' + cls + '">' +
       '<span class="sr-only">' + state + '</span>' +
       '<span class="badge-line">' + icon +
       '<span class="badge-name">' + esc(shown) + '</span></span>' +
-      '<span class="badge-threshold">' + lock + esc(opts.threshold) + '</span></li>';
+      '<span class="badge-threshold">' + lock + esc(cert) + esc(opts.threshold) + '</span></li>';
+  }
+
+  function certOf(on, cloudOk) {
+    if (!on) return '';
+    return cloudOk ? 'cloud' : 'pending';
   }
 
   function wallHtml(rows) {
@@ -590,20 +850,30 @@
     unlocks.forEach(function (item) { onIds[item.id] = true; });
     var totalBadges = model.wards.length * 3 + titles.cities.length + (titles.grand.title ? 1 : 0);
     var grandOn = !!onIds.grand;
+    var grandCloud = rows.length > 0 && rows.every(function (row) {
+      return isWardComplete(row.prog.cloudDone, row.prog.total);
+    });
     var grand = '<ul class="badge-feature">' + badgeHtml({
       scope: 'grand',
       tier: 0,
       on: grandOn,
+      cert: certOf(grandOn, grandCloud),
       title: titles.grand.title,
       icon: titles.grand.icon,
       threshold: titles.grand.kicker
     }) + '</ul>';
     var cityItems = titles.cities.map(function (city) {
       var id = 'city:' + city.city;
+      var list = rows.filter(function (row) { return row.ward.city === city.city; });
+      var cloudReady = list.length > 0 && list.every(function (row) {
+        return isWardComplete(row.prog.cloudDone, row.prog.total);
+      });
+      var on = !!onIds[id];
       return badgeHtml({
         scope: 'city',
         tier: 0,
-        on: !!onIds[id],
+        on: on,
+        cert: certOf(on, cloudReady),
         title: city.title,
         icon: city.icon,
         threshold: city.kicker
@@ -625,15 +895,18 @@
           if (!prog && row.ward === ward) prog = row.prog;
         });
         var tier = tierCount(prog.done, prog.total);
+        var cloudTier = tierCount(prog.cloudDone, prog.total);
         var entries = titlesFor(ward.city, ward.ward);
         var view = titleView(ward.city, ward.ward, prog.done, prog.total);
         var badges = [1, 2, 3].map(function (level) {
           var entry = entries[level - 1];
           var name = entryName(entry);
+          var on = tier >= level && !!name;
           return badgeHtml({
             scope: 'ward',
             tier: level,
-            on: tier >= level && !!name,
+            on: on,
+            cert: certOf(on, cloudTier >= level),
             title: name || '尚未設定',
             icon: entryIcon(entry),
             threshold: tierLabel(level)
@@ -650,7 +923,7 @@
       return '<section class="wall-city"><h3>' + esc(group.city) + '</h3><ul class="wall-wards">' +
         wardHtml + '</ul></section>';
     }).join('');
-    var lead = '各區完成的景點達 1/3、2/3 與全部時，依序解鎖三個稱號。一座城市裡每個區都完成，解鎖城市稱號；' +
+    var lead = '各區完成的景點達 1/3、2/3 與全部時，依序解鎖三個稱號。自己勾選或雲端拍到都算完成；只有勾選、雲端還沒看到的，會標成待確認。一座城市裡每個區都完成，解鎖城市稱號；' +
       model.wards.length + ' 個區全部完成，解鎖最終稱號。';
     return '<section class="wall" id="badge-wall" aria-labelledby="wall-title">' +
       '<div class="sec-h"><h2 id="wall-title">稱號牆</h2><span>已解鎖 ' + unlocks.length + ' / ' + totalBadges + '</span></div>' +
@@ -661,70 +934,272 @@
       '</section>';
   }
 
+  function bossName(city, ward) {
+    if (!model || !model.rpg || !model.rpg.bosses) return '';
+    return model.rpg.bosses[wardKey(city, ward)] || '';
+  }
+
+  function stageName(tier) {
+    var stages = model && model.rpg ? model.rpg.stages : [];
+    var found = '';
+    stages.forEach(function (stage) {
+      if (!found && stage.tier === tier) found = stage.name;
+    });
+    if (found) return found;
+    if (tier === 1) return '小怪';
+    if (tier === 2) return '精英怪';
+    if (tier === 3) return '魔王';
+    return '';
+  }
+
+  function rankUnlocks(list) {
+    return list.slice().sort(function (a, b) {
+      function rank(item) {
+        if (item.scope === 'grand') return 0;
+        if (item.scope === 'city') return 1;
+        return 10 - (item.tier || 0);
+      }
+      return rank(a) - rank(b);
+    });
+  }
+
+  function equipStorageKey() {
+    return model && model.demo ? EQUIP_KEY_DEMO : EQUIP_KEY;
+  }
+
+  function readEquip() {
+    try {
+      return localStorage.getItem(equipStorageKey()) || '';
+    } catch (err) {
+      return '';
+    }
+  }
+
+  function writeEquip(id) {
+    try { localStorage.setItem(equipStorageKey(), id || ''); } catch (err) {}
+  }
+
+  function resolveEquip(unlocks) {
+    var titles = unlocks.filter(function (item) {
+      return item.scope === 'ward' || item.scope === 'city' || item.scope === 'grand';
+    });
+    if (!titles.length) {
+      writeEquip('');
+      return null;
+    }
+    var seen = readSeen();
+    var fresh = titles.filter(function (item) { return !seen[item.id]; });
+    var pick = null;
+    if (fresh.length === 1) pick = fresh[0];
+    else if (fresh.length > 1) pick = rankUnlocks(fresh)[0];
+    else {
+      var stored = readEquip();
+      titles.forEach(function (item) {
+        if (!pick && item.id === stored) pick = item;
+      });
+      if (!pick) pick = rankUnlocks(titles)[0];
+    }
+    if (pick) writeEquip(pick.id);
+    return pick;
+  }
+
+  function xpBarHtml(score) {
+    if (!score) return '';
+    var level = score.level;
+    var role = score.classInfo.current;
+    var width = level.span ? (level.into / level.span) * 100 : 0;
+    var label = '等級 ' + level.level + '，' + role.name + '，經驗 ' + level.total + '，下一級 ' + level.nextXp +
+      '，手勾 ' + score.manualXp + '，雲端認證 ' + score.cloudXp;
+    return '<section class="xpbar" aria-label="' + esc(label) + '">' +
+      '<p class="xp-lv num"><b>Lv.' + level.level + '</b><span>' + esc(role.name) + '</span></p>' +
+      '<div class="xp-track"><div class="bar lg" role="progressbar" aria-valuemin="0" aria-valuemax="' + level.span +
+      '" aria-valuenow="' + level.into + '" aria-label="升級進度"><span style="width:' + width + '%"></span></div>' +
+      '<p class="xp-ratio num"><b>' + level.total + '</b><span> / ' + level.nextXp + '</span></p></div>' +
+      '<p class="xp-split"><span class="is-pending">手勾 XP ' + score.manualXp + '</span>' +
+      '<span class="is-cloud">雲端認證 XP ' + score.cloudXp + '</span></p></section>';
+  }
+
+  function sheetHtml(score, equipped, titleCount, titleTotal) {
+    if (!score) return '';
+    var role = score.classInfo.current;
+    var next = score.classInfo.next;
+    var nextLine = next
+      ? '<p class="sheet-next">下一職 ' + esc(next.name) + ' · Lv.' + next.level + '</p>'
+      : '<p class="sheet-next">職業已經登頂，再走也是傳說。</p>';
+    var titleHtml;
+    if (equipped) {
+      titleHtml = medalHtml(equipped.icon, equipped.scope, equipped.tier, true) +
+        '<b>' + esc(equipped.title) + '</b>';
+    } else {
+      titleHtml = '<b class="is-empty">尚未解鎖</b>';
+    }
+    var cities = score.perCity.map(function (city) {
+      var width = city.total ? (city.done / city.total) * 100 : 0;
+      var cloudW = city.total ? (city.cloudDone / city.total) * 100 : 0;
+      var pendW = city.total ? (city.pendingDone / city.total) * 100 : 0;
+      return '<li><div class="city-h"><span>' + esc(city.city) + '</span><b class="num">' + city.done +
+        '<span> / ' + city.total + '</span></b></div>' +
+        '<div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="' + city.total + '" aria-valuenow="' +
+        city.done + '" aria-label="' + esc(city.city) + '完成 ' + city.done + '，共 ' + city.total + '">' +
+        '<span class="is-cloud" style="width:' + cloudW + '%"></span>' +
+        '<span class="is-pending" style="width:' + pendW + '%"></span></div>' +
+        '<p class="split-count"><span class="is-cloud">雲端 ' + city.cloudDone + '</span>' +
+        '<span class="is-pending">待確認 ' + city.pendingDone + '</span></p></li>';
+    }).join('');
+    return '<section class="sheet" aria-labelledby="sheet-title">' +
+      '<div class="sheet-id"><p class="kicker" id="sheet-title">角色卡</p>' +
+      '<p class="sheet-lv num">Lv.' + score.level.level + '</p>' +
+      '<h2 class="sheet-class">' + esc(role.name) + '</h2>' +
+      (role.blurb ? '<p class="sheet-blurb">' + esc(role.blurb) + '</p>' : '') +
+      nextLine +
+      '<p class="xp-split sheet-xp"><span class="is-pending">手勾 XP ' + score.manualXp + '</span>' +
+      '<span class="is-cloud">雲端認證 XP ' + score.cloudXp + '</span></p>' +
+      '<p class="sheet-title-line"><span>最新稱號</span>' + titleHtml + '</p>' +
+      '<p class="sheet-count">稱號 <b class="num">' + titleCount + '</b><span> / ' + titleTotal + '</span></p></div>' +
+      '<div class="sheet-cities"><p class="kicker">各城完成</p><ul>' + cities + '</ul></div></section>';
+  }
+
+  function bossLine(city, ward, defeated) {
+    if (!defeated) {
+      return '<p class="boss is-secret"><span class="sr-only">魔王尚未討伐</span>' +
+        '<span class="boss-k" aria-hidden="true">魔王</span>' + lockMedalHtml() +
+        '<b aria-hidden="true">' + HIDDEN_MARK + '</b></p>';
+    }
+    var name = bossName(city, ward) || '這區的無名魔王';
+    return '<p class="boss is-down"><span class="sr-only">魔王已討伐</span><span class="boss-k">魔王</span><b>' +
+      esc(name) + '</b></p>';
+  }
+
+  function stageList(tier, cloudTier) {
+    var html = [1, 2, 3].map(function (level) {
+      var state = 'is-locked';
+      var word = '未討伐';
+      if (level <= tier && level <= cloudTier) {
+        state = 'is-cloud';
+        word = '雲端認證';
+      } else if (level <= tier) {
+        state = 'is-pending';
+        word = '待確認';
+      }
+      var name = stageName(level);
+      return '<li class="' + state + '"><span class="sr-only">' + esc(name + word) + '</span>' +
+        '<b aria-hidden="true">' + esc(name) + '</b><small aria-hidden="true">' + esc(word) + '</small></li>';
+    }).join('');
+    return '<ol class="stages">' + html + '</ol>';
+  }
+
+  function dungeonCard(row) {
+    var ward = row.ward;
+    var prog = row.prog;
+    var view = titleView(ward.city, ward.ward, prog.done, prog.total);
+    var placeIcon = view.earned ? medalHtml(view.icon, 'ward', view.tier, true) : '';
+    var place = '<span class="place"><small>' + esc(ward.city) + '</small><span class="place-name">' +
+      esc(ward.ward) + placeIcon + '</span></span>';
+    var earned = titleLine(view);
+    if (!ward.spots.length && !prog.synthetic) {
+      return '<li><div class="ward"><div class="ward-top"><span class="date num">' + esc(ward.date) +
+        '</span><span class="soon">清單整理中</span></div><div class="ward-mid">' + place +
+        '</div>' + earned + '</div></li>';
+    }
+    var tier = tierCount(prog.done, prog.total);
+    var cloudTier = tierCount(prog.cloudDone, prog.total);
+    var href = '#/' + ward.city + '/' + ward.ward;
+    var drop = view.earned
+      ? '<p class="drop"><span>掉落稱號</span>' + medalHtml(view.icon, 'ward', view.tier, true) + '<b>' + esc(view.name) + '</b></p>'
+      : titleLine(view);
+    return '<li><a class="ward dungeon" href="' + esc(href) + '"><div class="ward-top"><span class="date num">' +
+      esc(ward.date) + '</span><span class="frac num"><b>' + prog.done + '</b><span> / ' + prog.total +
+      '</span></span></div><div class="ward-mid">' + place + '<i class="go" aria-hidden="true"></i></div>' +
+      stageList(tier, cloudTier) +
+      bossLine(ward.city, ward.ward, tier >= 3) +
+      drop +
+      '<div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="' + prog.total +
+      '" aria-valuenow="' + prog.done + '" aria-label="' + esc(ward.city + ward.ward) + '副本，完成 ' + prog.done +
+      '，雲端認證 ' + prog.cloudDone + '，待確認 ' + prog.pendingDone + '">' +
+      splitBar(prog.done, prog.total, prog.cloudDone, prog.pendingDone) + '</div>' +
+      splitCount(prog.cloudDone, prog.pendingDone) + '</a></li>';
+  }
+
+  function chestHtml(score) {
+    if (!score) return '';
+    var open = 0;
+    var items = score.achievements.map(function (item) {
+      if (item.unlocked) {
+        open += 1;
+        return '<li class="chest is-open"><span class="sr-only">已解鎖</span>' +
+          '<span class="chest-ico" aria-hidden="true">' + glyph(item.icon || 'chest') + '</span>' +
+          '<span class="chest-name">' + esc(item.name) + '</span>' +
+          (item.flavor ? '<span class="chest-flavor">' + esc(item.flavor) + '</span>' : '') + '</li>';
+      }
+      return '<li class="chest is-locked"><span class="sr-only">未解鎖</span>' +
+        '<span class="chest-ico" aria-hidden="true">' + glyph('chest') + '</span>' +
+        '<span class="chest-name" aria-hidden="true">' + HIDDEN_MARK + '</span></li>';
+    }).join('');
+    if (!items) return '';
+    return '<section class="chests-sec" aria-labelledby="chest-title">' +
+      '<div class="sec-h"><h2 id="chest-title">寶箱</h2><span>已打開 ' + open + ' / ' + score.achievements.length + '</span></div>' +
+      '<p class="wall-lead">寶箱關著的時候只看得到問號。自己勾選或雲端拍到都能打開，取消勾選又沒有雲端照片，箱子會重新關上。</p>' +
+      '<ul class="chests">' + items + '</ul></section>';
+  }
+
   function renderHome() {
     document.title = '景點拍照進度';
     var rows = rowsOf();
     var done = 0;
     var total = 0;
+    var cloud = 0;
+    var pending = 0;
     rows.forEach(function (row) {
-      if (row.prog.total) {
-        done += row.prog.done;
-        total += row.prog.total;
-      }
+      if (!row.prog.total) return;
+      done += row.prog.done;
+      total += row.prog.total;
+      cloud += row.prog.cloudDone;
+      pending += row.prog.pendingDone;
     });
-    var items = rows.map(function (row) {
-      var ward = row.ward;
-      var prog = row.prog;
-      var view = titleView(ward.city, ward.ward, prog.done, prog.total);
-      var placeIcon = view.earned ? medalHtml(view.icon, 'ward', view.tier, true) : '';
-      var place = '<span class="place"><small>' + esc(ward.city) + '</small><span class="place-name">' +
-        esc(ward.ward) + placeIcon + '</span></span>';
-      var earned = titleLine(view);
-      if (!ward.spots.length && !prog.synthetic) {
-        return '<li><div class="ward"><div class="ward-top"><span class="date num">' + esc(ward.date) +
-          '</span><span class="soon">清單整理中</span></div><div class="ward-mid">' + place +
-          '</div>' + earned + '</div></li>';
-      }
-      var width = prog.total ? (prog.done / prog.total) * 100 : 0;
-      var href = '#/' + ward.city + '/' + ward.ward;
-      return '<li><a class="ward" href="' + esc(href) + '"><div class="ward-top"><span class="date num">' +
-        esc(ward.date) + '</span><span class="frac num"><b>' + prog.done + '</b><span> / ' + prog.total +
-        '</span></span></div><div class="ward-mid">' + place + '<i class="go" aria-hidden="true"></i></div>' +
-        earned +
-        '<div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="' + prog.total +
-        '" aria-valuenow="' + prog.done + '" aria-label="' + esc(ward.city + ward.ward) + '進度">' +
-        '<span style="width:' + width + '%"></span></div></a></li>';
-    }).join('');
-
+    var score = scoreNow();
+    var unlocks = model.titles ? collectUnlocks(unlockRows(rows), model.titles) : [];
+    var equipped = resolveEquip(unlocks);
+    var titleTotal = model.titles
+      ? model.wards.length * 3 + model.titles.cities.length + (model.titles.grand.title ? 1 : 0)
+      : 0;
+    var items = rows.map(dungeonCard).join('');
     document.getElementById('app').innerHTML =
-      '<header class="mast"><p class="brand">物件景點</p><h1>景點拍照進度</h1></header>' +
+      xpBarHtml(score) +
+      '<header class="mast"><p class="brand">物件景點・走跳 RPG</p><h1>景點拍照進度</h1></header>' +
       banner() +
+      sheetHtml(score, equipped, unlocks.length, titleTotal) +
       '<div class="desk-split">' +
-      progressCard('整體進度', done, total, true) +
-      noteBlock('請將照片上傳到 Google Drive 資料夾「物件景點／城市／區」，並使用建議檔名。同一景點最多三張，尾碼為 01、02、03。燈號只看雲端偵測結果，每次偵測後會更新。勾選框是自己的紀錄，只存在這台裝置。稱號依各區已偵測完成的景點比例解鎖。') +
+      progressCard('整體進度', done, total, true, { cloud: cloud, pending: pending }) +
+      noteBlock('請將照片上傳到 Google Drive 資料夾「物件景點／城市／區」，並使用建議檔名。同一景點最多三張，尾碼為 01、02、03。勾選會立刻加經驗，也算完成這個景點，畫面上寫待確認；雲端偵測到才亮綠燈，標成雲端認證。兩邊的經驗加在一起。取消勾選、又還沒被雲端拍到，稱號、魔王和寶箱會鎖回去。勾選只存在這台裝置。') +
       '</div>' +
-      wallHtml(rows) +
-      '<div class="sec-h"><h2>行程</h2><span>' + model.wards.length + ' 個區域</span></div>' +
-      '<ol class="wards">' + items + '</ol>';
+      '<div class="sec-h"><h2>副本</h2><span>' + model.wards.length + ' 座</span></div>' +
+      '<p class="wall-lead">每個區是一座副本。三分之一收小怪，三分之二打精英，全部清完才看得到魔王的名字，並掉落該區稱號。</p>' +
+      '<ol class="wards">' + items + '</ol>' +
+      chestHtml(score) +
+      wallHtml(rows);
   }
 
   function wardLadder(ward, prog) {
     if (!model.titles) return '';
     var tier = tierCount(prog.done, prog.total);
+    var cloudTier = tierCount(prog.cloudDone, prog.total);
     var entries = titlesFor(ward.city, ward.ward);
     var badges = [1, 2, 3].map(function (level) {
       var entry = entries[level - 1];
       var name = entryName(entry);
+      var on = tier >= level && !!name;
       return badgeHtml({
         scope: 'ward',
         tier: level,
-        on: tier >= level && !!name,
+        on: on,
+        cert: certOf(on, cloudTier >= level),
         title: name || '尚未設定',
         icon: entryIcon(entry),
         threshold: tierLabel(level)
       });
     }).join('');
-    return '<ul class="badge-row ward-ladder">' + badges + '</ul>';
+    return stageList(tier, cloudTier) + bossLine(ward.city, ward.ward, tier >= 3) +
+      '<ul class="badge-row ward-ladder">' + badges + '</ul>';
   }
 
   function renderWard(city, wardName) {
@@ -763,23 +1238,29 @@
       var slots = prog.found[index] || [false, false, false];
       var count = slots.filter(Boolean).length;
       var hit = count > 0;
-      var warn = ticks.some(Boolean) && !hit;
+      var pending = ticks.some(Boolean) && !hit;
       var hidden = state.cat !== 'all' && state.cat !== spot.cat;
       var file = suggestName(ward.ward, spot.cat, spot.name);
       var boxes = SLOTS.map(function (slot, slotIndex) {
         return '<label class="tick"><input type="checkbox" data-tick="' + slotIndex + '"' +
           (ticks[slotIndex] ? ' checked' : '') + ' aria-label="' + slot + '"><span>' + slot + '</span></label>';
       }).join('');
-      return '<tr class="spot' + (hidden ? ' is-hide' : '') + (warn ? ' has-warn' : '') + '" data-key="' + esc(key) + '" data-cat="' +
+      var lampClass = hit ? ' is-on is-cloud' : (pending ? ' is-pending' : '');
+      var lampLabel = hit
+        ? '已偵測 ' + count + ' 張，共 3 張，雲端認證'
+        : (pending ? '待確認，雲端尚未偵測' : '尚未完成，0 張，共 3 張');
+      var lampText = hit
+        ? '<span class="num">' + count + '/3</span><span class="cert">雲端認證</span>'
+        : (pending ? '<span class="cert">待確認</span>' : '<span class="num">0/3</span>');
+      return '<tr class="spot' + (hidden ? ' is-hide' : '') + (pending ? ' has-pending' : '') + '" data-key="' + esc(key) + '" data-cat="' +
         esc(spot.cat) + '" data-hit="' + (hit ? '1' : '0') + '">' +
         '<td class="td-cat"><span class="cat">' + esc(spot.cat) + '</span></td>' +
         '<td class="td-name"><span class="spot-name">' + esc(spot.name) + '</span></td>' +
         '<td class="td-file"><span class="cell-k">建議檔名</span><div class="fname"><code>' + esc(file).replace(/_01\.jpg$/, '<wbr>_01.jpg') +
         '</code><button type="button" class="copy" data-copy="' + esc(file) + '">複製</button></div></td>' +
         '<td class="td-ticks"><span class="cell-k">自行勾選</span><div class="ticks">' + boxes + '</div></td>' +
-        '<td class="td-lamp"><span class="cell-k">燈號</span><p class="lamp' + (hit ? ' is-on' : '') +
-        '" aria-label="已偵測 ' + count + ' 張，共 3 張"><i class="dot" aria-hidden="true"></i><span class="num">' +
-        count + '/3</span></p><p class="warn' + (warn ? '' : ' is-hide') + '">已勾但雲端還沒偵測到</p></td></tr>';
+        '<td class="td-lamp"><span class="cell-k">燈號</span><p class="lamp' + lampClass +
+        '" aria-label="' + lampLabel + '"><i class="dot" aria-hidden="true"></i>' + lampText + '</p></td></tr>';
     }).join('');
 
     var shown = ward.spots.filter(function (spot) {
@@ -807,13 +1288,16 @@
     var plate = model.titles ? '<div class="title-plate">' + titleLine(view) + wardLadder(ward, prog) + '</div>' : '';
     var headIcon = view.earned ? medalHtml(view.icon, 'ward', view.tier, true) : '';
     app.innerHTML =
+      xpBarHtml(scoreNow()) +
       '<header class="mast"><a class="back" href="#/">返回總覽</a><p class="brand">' + esc(ward.date) + ' · ' +
       esc(ward.city) + '</p><h1 class="' + (headIcon ? 'with-tier' : '') + '"><span>' + esc(ward.ward) +
       '</span>' + headIcon + '</h1>' + plate + '</header>' +
       banner() +
       '<div class="desk-split">' +
-      (ward.spots.length || prog.synthetic ? progressCard(ward.ward + '進度', prog.done, prog.total, true) : '') +
-      noteBlock('請上傳到 Google Drive「' + esc(folder) + '」，並使用建議檔名。燈號會在每次偵測後更新。勾選框只存在這台裝置，也不會讓稱號提前解鎖。') +
+      (ward.spots.length || prog.synthetic
+        ? progressCard(ward.ward + '進度', prog.done, prog.total, true, { cloud: prog.cloudDone, pending: prog.pendingDone })
+        : '') +
+      noteBlock('請上傳到 Google Drive「' + esc(folder) + '」，並使用建議檔名。勾選立刻 +3 XP，也算這個景點完成，燈號會寫待確認。雲端拍到才是雲端認證。取消勾選、雲端又還沒有照片，這座副本的稱號會鎖回去。') +
       '</div>' +
       body;
   }
@@ -857,14 +1341,47 @@
   }
 
   function pushToast(item) {
+    spawnToast({
+      id: item.id,
+      className: 'scope-' + item.scope + (item.tier ? ' tier-' + item.tier : ''),
+      icon: medalHtml(item.icon, item.scope, item.tier, true),
+      kicker: '恭喜解鎖',
+      title: item.title,
+      meta: toastMeta(item)
+    });
+  }
+
+  function pushClassToast(role, level) {
+    spawnToast({
+      id: 'class:' + role.name,
+      className: 'scope-class',
+      icon: '<span class="level-orb num">' + level + '</span>',
+      kicker: '職業升級',
+      title: role.name,
+      meta: 'Lv.' + level + (role.blurb ? ' · ' + role.blurb : '')
+    });
+  }
+
+  function pushAchToast(item) {
+    spawnToast({
+      id: 'ach:' + item.id,
+      className: 'scope-ach',
+      icon: '<span class="chest-ico is-open">' + glyph(item.icon || 'chest') + '</span>',
+      kicker: '寶箱開啟',
+      title: item.name,
+      meta: item.flavor || '成就解鎖'
+    });
+  }
+
+  function spawnToast(opts) {
     var host = toastHost();
     var node = document.createElement('div');
-    node.className = 'toast scope-' + item.scope + (item.tier ? ' tier-' + item.tier : '');
-    node.setAttribute('data-toast-id', item.id);
+    node.className = 'toast ' + (opts.className || '');
+    node.setAttribute('data-toast-id', opts.id);
     node.innerHTML =
-      medalHtml(item.icon, item.scope, item.tier, true) +
-      '<div class="toast-copy"><p class="toast-kicker">恭喜解鎖</p><p class="toast-title">' + esc(item.title) +
-      '</p><p class="toast-meta">' + esc(toastMeta(item)) + '</p></div>' +
+      opts.icon +
+      '<div class="toast-copy"><p class="toast-kicker">' + esc(opts.kicker) + '</p><p class="toast-title">' + esc(opts.title) +
+      '</p><p class="toast-meta">' + esc(opts.meta) + '</p></div>' +
       '<button type="button" class="toast-x" data-toast-close aria-label="關閉提示">×</button>';
     host.appendChild(node);
     clearTimeout(node._timer);
@@ -882,23 +1399,70 @@
   }
 
   function maybeToast() {
-    if (!model || !model.titles || typeof document === 'undefined') return;
+    if (!model || typeof document === 'undefined') return;
     var rows = rowsOf();
-    var unlocks = collectUnlocks(unlockRows(rows), model.titles);
+    var unlocks = model.titles ? collectUnlocks(unlockRows(rows), model.titles) : [];
+    var score = scoreNow();
     var seen = readSeen();
-    var fresh = unlocks.filter(function (item) { return !seen[item.id]; });
-    if (!fresh.length) return;
-    fresh.sort(function (a, b) {
-      function rank(item) {
-        if (item.scope === 'grand') return 0;
-        if (item.scope === 'city') return 1;
-        return 10 - item.tier;
+    var active = {};
+    unlocks.forEach(function (item) { active[item.id] = true; });
+    if (score) {
+      score.achievements.forEach(function (item) {
+        if (item.unlocked) active['ach:' + item.id] = true;
+      });
+    }
+    Object.keys(seen).forEach(function (id) {
+      if (id.indexOf('class:') === 0) return;
+      if (id.indexOf('ach:') === 0) {
+        if (!active[id]) delete seen[id];
+        return;
       }
-      return rank(a) - rank(b);
+      if (!model.titles) return;
+      if (!active[id]) delete seen[id];
     });
+    var fresh = rankUnlocks(unlocks.filter(function (item) { return !seen[item.id]; }));
+    if (fresh.length) writeEquip(fresh[0].id);
     fresh.forEach(function (item) { seen[item.id] = 1; });
-    writeSeen(seen);
+    var achFresh = [];
+    if (score) {
+      score.achievements.forEach(function (item) {
+        var id = 'ach:' + item.id;
+        if (item.unlocked && !seen[id]) {
+          achFresh.push(item);
+          seen[id] = 1;
+        }
+      });
+      var level = score.level.level;
+      var seenLevel = 1;
+      score.config.classes.forEach(function (role) {
+        if (seen['class:' + role.name]) seenLevel = Math.max(seenLevel, role.level);
+      });
+      var current = score.classInfo.current;
+      var classToast = null;
+      if (current && current.level > 1 && current.level > seenLevel) classToast = current;
+      score.config.classes.forEach(function (role) {
+        if (role.level <= level) seen['class:' + role.name] = 1;
+        else delete seen['class:' + role.name];
+      });
+      writeSeen(seen);
+      if (classToast) pushClassToast(classToast, level);
+    } else {
+      writeSeen(seen);
+    }
     fresh.forEach(pushToast);
+    achFresh.forEach(pushAchToast);
+  }
+
+  function floatXp(x, y, amount) {
+    var node = document.createElement('div');
+    node.className = 'xp-float num';
+    node.textContent = '+' + amount;
+    node.style.left = Math.round(x) + 'px';
+    node.style.top = Math.round(y) + 'px';
+    document.body.appendChild(node);
+    setTimeout(function () {
+      if (node.parentNode) node.parentNode.removeChild(node);
+    }, 900);
   }
 
   function applyFilter() {
@@ -977,14 +1541,19 @@
 
   function onChange(event) {
     var input = event.target.closest('input[data-tick]');
-    if (!input) return;
+    if (!input || !model) return;
     var row = input.closest('tr.spot');
     if (!row) return;
-    var ticks = writeTick(row.getAttribute('data-key'), Number(input.getAttribute('data-tick')), input.checked);
-    var showWarn = ticks.some(Boolean) && row.getAttribute('data-hit') !== '1';
-    var warn = row.querySelector('.warn');
-    if (warn) warn.classList.toggle('is-hide', !showWarn);
-    row.classList.toggle('has-warn', showWarn);
+    var rect = input.getBoundingClientRect();
+    var before = scoreNow();
+    var beforeXp = before ? before.totalXp : 0;
+    writeTick(row.getAttribute('data-key'), Number(input.getAttribute('data-tick')), input.checked);
+    var scrollY = window.scrollY;
+    render();
+    window.scrollTo(0, scrollY);
+    var after = scoreNow();
+    var delta = (after ? after.totalXp : 0) - beforeXp;
+    if (delta > 0) floatXp(rect.left + rect.width / 2, rect.top, delta);
   }
 
   var api = {

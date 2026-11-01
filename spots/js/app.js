@@ -1333,7 +1333,7 @@
           '<span class="gear-copy"><span class="gear-k">' + label + (row.manual ? '・手動' : '') +
           '</span><span class="gear-name">' + esc(item.name) + '</span><span class="gear-bonus">' +
           (statLine(item.stats) || '沒有加成') + '</span></span>'
-        : '<span class="loot-ico is-sil" aria-hidden="true">🎁</span><span class="gear-copy"><span class="gear-k">' +
+        : '<span class="gear-copy"><span class="gear-k">' +
           label + '</span><span class="gear-name is-empty">尚未入手</span></span>';
       return '<button type="button" class="gear-slot' + (item ? ' ' + rarityClass(item.rarity) : ' is-empty') +
         (open ? ' is-open' : '') + '" data-gear="' + slot + '" aria-expanded="' + (open ? 'true' : 'false') + '">' +
@@ -1410,6 +1410,10 @@
         if (view.resolved[slot].item) equipped[view.resolved[slot].item.id] = true;
       });
     }
+    if (!summary.owned) {
+      return '<section class="codex" id="loot-codex" aria-labelledby="codex-title"><div class="sec-h"><h2 id="codex-title">戰利品圖鑑</h2><span class="num">已入手 0</span></div>' +
+        '<p class="gear-empty">背包還是空的。還沒有完成的景點，就不會掉東西，也不會打開寶箱。</p></section>';
+    }
     var cells = model.loot.items.filter(function (item) {
       return state.codex === 'all' || item.category === state.codex;
     }).map(function (item) {
@@ -1436,7 +1440,7 @@
     }).join('');
     return '<section class="codex" id="loot-codex" aria-labelledby="codex-title"><div class="sec-h"><h2 id="codex-title">戰利品圖鑑</h2><span class="num">已入手 ' +
       summary.owned + ' / ' + summary.total + '</span></div>' +
-      '<p class="wall-lead">完成的景點、討伐的魔王、打開的寶箱都會掉東西。同一進度在每台裝置、每次雲端掃描算出來都一樣。入手的亮出名號，還沒掉到的先鎖成剪影。武器、魔法、防具可以穿上；消耗品進口袋就直接加進能力。</p>' +
+      '<p class="wall-lead">景點每完成兩處或三處才掉一件。魔王討伐和寶箱開啟另外保證掉落，但都要先有完成的景點。同一進度在每台裝置算出來都一樣。還沒掉到的先鎖成剪影。武器、魔法、防具可以穿上；消耗品進口袋就直接加進能力。</p>' +
       '<ul class="rarity-counts">' + rarityBits + '</ul>' +
       '<div class="chips" role="toolbar" aria-label="圖鑑分類">' + chips + '</div>' +
       '<ul class="loot-grid">' + cells + '</ul></section>';
@@ -1532,17 +1536,20 @@
     var bag = lootBag();
     if (!bag) return;
     var active = {};
-    bag.drops.forEach(function (drop) { active[drop.source] = drop; });
+    var watch = {};
+    (Array.isArray(bag.watched) ? bag.watched : []).forEach(function (id) { watch[id] = 1; });
+    bag.drops.forEach(function (drop) {
+      active[drop.source] = drop;
+      watch[drop.source] = 1;
+    });
     var ids = readLootSeen();
     if (!ids) {
-      var seed = {};
-      Object.keys(active).forEach(function (id) { seed[id] = 1; });
-      writeLootSeen(seed);
+      writeLootSeen(watch);
       return;
     }
     var dirty = false;
     Object.keys(ids).forEach(function (id) {
-      if (!active[id]) {
+      if (!watch[id]) {
         delete ids[id];
         dirty = true;
       }
@@ -1551,8 +1558,13 @@
     bag.drops.forEach(function (drop) {
       if (ids[drop.source]) return;
       fresh.push(drop);
-      ids[drop.source] = 1;
       dirty = true;
+    });
+    Object.keys(watch).forEach(function (id) {
+      if (!ids[id]) {
+        ids[id] = 1;
+        dirty = true;
+      }
     });
     if (dirty) writeLootSeen(ids);
     if (fresh.length) queueReveals(fresh);
@@ -1595,7 +1607,7 @@
       noteBlock('請將照片上傳到 Google Drive 資料夾「物件景點／城市／區」，並使用建議檔名。同一景點最多三張，尾碼為 01、02、03。勾選會立刻加經驗，也算完成這個景點，畫面上寫待確認；雲端偵測到才亮綠燈，標成雲端認證。兩邊的經驗加在一起。取消勾選、又還沒被雲端拍到，稱號、魔王和寶箱會鎖回去。勾選只存在這台裝置。') +
       '</div>' +
       '<div class="sec-h"><h2>副本</h2><span>' + model.wards.length + ' 座</span></div>' +
-      '<p class="wall-lead">每個區是一座副本。三分之一收小怪，三分之二打精英，全部清完才看得到魔王的名字，並掉落該區稱號。每完成一個景點會再掉一件戰利品，同一景點在每台裝置算出來都一樣。</p>' +
+      '<p class="wall-lead">每個區是一座副本。三分之一收小怪，三分之二打精英，全部清完才看得到魔王的名字，並掉落該區稱號。景點每完成兩處或三處才掉一件戰利品，算過的結果每台裝置都一樣。</p>' +
       '<ol class="wards">' + items + '</ol>' +
       chestHtml(score) +
       codexHtml() +
@@ -1732,7 +1744,7 @@
       (ward.spots.length || prog.synthetic
         ? progressCard(ward.ward + '進度', prog.done, prog.total, true, { cloud: prog.cloudDone, pending: prog.pendingDone })
         : '') +
-      noteBlock('請上傳到 Google Drive「' + esc(folder) + '」，並使用建議檔名。勾選立刻 +3 XP，也算這個景點完成，燈號會寫待確認。雲端拍到才是雲端認證。取消勾選、雲端又還沒有照片，這座副本的稱號會鎖回去。完成的景點會掉一件戰利品，取消後若雲端也沒有照片，那件掉落會鎖回去。') +
+      noteBlock('請上傳到 Google Drive「' + esc(folder) + '」，並使用建議檔名。勾選立刻 +3 XP，也算這個景點完成，燈號會寫待確認。雲端拍到才是雲端認證。取消勾選、雲端又還沒有照片，這座副本的稱號會鎖回去。戰利品每完成兩處或三處才掉一件。取消後若雲端也沒有照片，那件掉落會鎖回去。') +
       '</div>' +
       body;
   }

@@ -7,6 +7,8 @@
 
   var SLOTS = ['weapon', 'magic', 'armor'];
   var RARITY_FLOOR = { spot: 'common', boss: 'epic', achievement: 'rare' };
+  var SPOT_DROP_CHANCE = 40;
+  var SPOT_DRY_LIMIT = 3;
   var DEFAULT_RARITIES = [
     { id: 'common', name: '普通', rank: 1 },
     { id: 'rare', name: '稀有', rank: 2 },
@@ -253,31 +255,98 @@
     owned.sources.push(drop.source);
   }
 
-  function collect(rawConfig, report) {
-    var config = rawConfig && rawConfig.items && rawConfig.itemById ? rawConfig : normLoot(rawConfig);
-    var bag = { drops: [], owned: {}, bySource: {} };
-    var data = report && typeof report === 'object' ? report : {};
-    (Array.isArray(data.spots) ? data.spots : []).forEach(function (spot) {
+  function completedSpots(list) {
+    var out = [];
+    (Array.isArray(list) ? list : []).forEach(function (spot) {
       if (!spot || !spot.complete) return;
       var source = sourceId('spot', [spot.city, spot.ward, spot.cat, spot.name]);
-      var item = dropFor(config, source, 'spot');
-      if (!item) return;
-      pushDrop(bag, {
+      out.push({
         source: source,
-        kind: 'spot',
-        item: item,
         city: nfc(spot.city || ''),
         ward: nfc(spot.ward || ''),
         cat: nfc(spot.cat || ''),
         name: nfc(spot.name || ''),
+        order: hash32(source + '\u001forder')
+      });
+    });
+    out.sort(function (a, b) {
+      if (a.order !== b.order) return a.order < b.order ? -1 : 1;
+      if (a.source < b.source) return -1;
+      if (a.source > b.source) return 1;
+      return 0;
+    });
+    return out;
+  }
+
+  function nextGap(source) {
+    var roll = mix32(hash32(source + '\u001fgap')) % 100;
+    if (roll < SPOT_DROP_CHANCE) return 2;
+    return SPOT_DRY_LIMIT;
+  }
+
+  function emptySummary(config) {
+    var rarityTotals = {};
+    config.rarities.forEach(function (row) {
+      rarityTotals[row.id] = { id: row.id, name: row.name, rank: row.rank, owned: 0, total: 0 };
+    });
+    config.items.forEach(function (item) {
+      if (rarityTotals[item.rarity]) rarityTotals[item.rarity].total += 1;
+    });
+    return { owned: 0, total: config.items.length, rarity: rarityTotals };
+  }
+
+  function fillSummary(config, bag) {
+    var summary = emptySummary(config);
+    config.items.forEach(function (item) {
+      if (bag.owned[item.id] && summary.rarity[item.rarity]) summary.rarity[item.rarity].owned += 1;
+    });
+    summary.owned = config.items.filter(function (item) { return !!bag.owned[item.id]; }).length;
+    return summary;
+  }
+
+  function collect(rawConfig, report) {
+    var config = rawConfig && rawConfig.items && rawConfig.itemById ? rawConfig : normLoot(rawConfig);
+    var bag = { drops: [], owned: {}, bySource: {}, watched: [] };
+    var data = report && typeof report === 'object' ? report : {};
+    var doneSpots = completedSpots(data.spots);
+    var doneByWard = {};
+    doneSpots.forEach(function (spot) {
+      var wardId = spot.city + '\u001f' + spot.ward;
+      doneByWard[wardId] = (doneByWard[wardId] || 0) + 1;
+    });
+    if (!doneSpots.length) {
+      bag.summary = emptySummary(config);
+      return bag;
+    }
+    var since = 0;
+    var gap = nextGap('\u001fstart');
+    doneSpots.forEach(function (spot) {
+      bag.watched.push(spot.source);
+      since += 1;
+      if (since < gap) return;
+      since = 0;
+      gap = nextGap(spot.source);
+      var item = dropFor(config, spot.source, 'spot');
+      if (!item) return;
+      pushDrop(bag, {
+        source: spot.source,
+        kind: 'spot',
+        item: item,
+        city: spot.city,
+        ward: spot.ward,
+        cat: spot.cat,
+        name: spot.name,
         achievementName: ''
       });
     });
     (Array.isArray(data.bosses) ? data.bosses : []).forEach(function (boss) {
       if (!boss || !boss.defeated) return;
+      var wardId = nfc(boss.city || '') + '\u001f' + nfc(boss.ward || '');
+      if (!doneByWard[wardId]) return;
       var source = sourceId('boss', [boss.city, boss.ward]);
       var item = dropFor(config, source, 'boss');
       if (!item) return;
+      bag.watched.push(source);
       pushDrop(bag, {
         source: source,
         kind: 'boss',
@@ -294,6 +363,7 @@
       var source = sourceId('achievement', [row.id]);
       var item = dropFor(config, source, 'achievement');
       if (!item) return;
+      bag.watched.push(source);
       pushDrop(bag, {
         source: source,
         kind: 'achievement',
@@ -305,22 +375,7 @@
         achievementName: nfc(row.name || '')
       });
     });
-    var rarityTotals = {};
-    config.rarities.forEach(function (row) {
-      rarityTotals[row.id] = { id: row.id, name: row.name, rank: row.rank, owned: 0, total: 0 };
-    });
-    config.items.forEach(function (item) {
-      if (!rarityTotals[item.rarity]) return;
-      rarityTotals[item.rarity].total += 1;
-      if (bag.owned[item.id]) rarityTotals[item.rarity].owned += 1;
-    });
-    var ownedCount = 0;
-    config.items.forEach(function (item) { if (bag.owned[item.id]) ownedCount += 1; });
-    bag.summary = {
-      owned: ownedCount,
-      total: config.items.length,
-      rarity: rarityTotals
-    };
+    bag.summary = fillSummary(config, bag);
     return bag;
   }
 

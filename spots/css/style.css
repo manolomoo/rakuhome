@@ -605,6 +605,7 @@ table.spots tr.spot:last-child td { border-bottom: 0; }
 }
 
 .current-title.is-empty b { color: var(--muted); font-weight: 400; }
+.current-title.is-teaser b { color: #8a4e12; }
 .current-title.tier-1 b { color: #8a4e12; }
 .current-title.tier-2 b { color: #1d4e73; }
 .current-title.tier-3 b { color: #8a5a00; }
@@ -619,7 +620,8 @@ table.spots tr.spot:last-child td { border-bottom: 0; }
 
 .title-plate .current-title { margin-top: 0; }
 .title-plate .current-title b { font-size: 22px; }
-.title-plate .tier-icon { width: 28px; height: 28px; }
+.title-plate .tier-icon { width: 36px; height: 36px; }
+.current-title .tier-icon { width: 24px; height: 24px; }
 .mast h1.with-tier .tier-icon { width: 32px; height: 32px; }
 
 .wall-lead {
@@ -685,9 +687,10 @@ table.spots tr.spot:last-child td { border-bottom: 0; }
   overflow-wrap: anywhere;
 }
 
-.wall-ward-h .tier-icon { width: 16px; height: 16px; }
+.wall-ward-h .tier-icon { width: 22px; height: 22px; }
 
 .wall-ward-h b.is-empty { color: var(--muted); font-weight: 400; }
+.wall-ward-h b.is-teaser { color: #8a4e12; font-weight: 700; }
 .wall-ward-h b.tier-1 { color: #8a4e12; }
 .wall-ward-h b.tier-2 { color: #1d4e73; }
 .wall-ward-h b.tier-3 { color: #8a5a00; }
@@ -766,23 +769,55 @@ table.spots tr.spot:last-child td { border-bottom: 0; }
 
 .tier-icon {
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex: none;
   width: 20px;
   height: 20px;
   line-height: 0;
+  border-radius: 50%;
+  border: 2px solid #d5dee6;
+  background: #fff;
+  color: #5d7384;
 }
 
-.tier-icon svg { display: block; width: 100%; height: 100%; }
+.tier-icon svg { display: block; width: 72%; height: 72%; }
+
+.tier-icon.is-teaser { border-color: #e0b48a; }
+
+.tier-icon.is-lock {
+  border-color: #c5d0d8;
+  background: #e4ebf0;
+  color: #7f92a1;
+}
+
+.tier-icon.is-lock svg {
+  width: 60%;
+  height: 60%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tier-icon-bronze.is-earned { border-color: #d08a3c; }
+.tier-icon-silver.is-earned { border-color: #8aa0b4; }
+.tier-icon-gold.is-earned { border-color: #e0b033; }
+.tier-icon-city.is-earned { border-color: #0a7ab5; }
+.tier-icon-grand.is-earned {
+  border-color: #f0c14b;
+  box-shadow: 0 0 0 2px rgba(240, 193, 75, .35);
+}
 
 .place-name .tier-icon { width: 22px; height: 22px; }
-.badge .tier-icon { width: 22px; height: 22px; }
-.badge .tier-icon-gold { width: 26px; height: 26px; }
+.badge .tier-icon { width: 28px; height: 28px; }
 .badge.scope-city .tier-icon { width: 44px; height: 44px; }
-.badge.scope-grand .tier-icon { width: 58px; height: 58px; }
+.badge.scope-grand .tier-icon { width: 56px; height: 56px; }
 
 .badge-line {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 8px;
   width: 100%;
   min-width: 0;
@@ -832,6 +867,16 @@ table.spots tr.spot:last-child td { border-bottom: 0; }
 }
 
 .badge.is-locked .badge-name { color: #607282; }
+.badge.is-teaser.is-locked {
+  background: #fffaf4;
+  border-color: #efd3b6;
+}
+.badge.is-teaser.is-locked .badge-name { color: #6d3d0e; }
+.badge.is-teaser.is-locked .badge-threshold { color: #a8642a; }
+.badge.is-secret .badge-name {
+  color: #8b9bab;
+  letter-spacing: .12em;
+}
 .badge.is-on.tier-1 .badge-name { color: #6d3d0e; }
 .badge.is-on.tier-2 .badge-name { color: #163e5c; }
 .badge.is-on.tier-3 .badge-name { color: #6d4a00; }

@@ -1691,7 +1691,7 @@
         }
       }
       var hidden = state.cat !== 'all' && state.cat !== spot.cat;
-      var file = suggestName(ward.ward, spot.cat, spot.name);
+      var file = filenameWithoutExt(suggestName(ward.ward, spot.cat, spot.name));
       var boxes = SLOTS.map(function (slot, slotIndex) {
         return '<label class="tick"><input type="checkbox" data-tick="' + slotIndex + '"' +
           (ticks[slotIndex] ? ' checked' : '') + ' aria-label="' + slot + '"><span>' + slot + '</span></label>';
@@ -1707,8 +1707,8 @@
         esc(spot.cat) + '" data-hit="' + (hit ? '1' : '0') + '">' +
         '<td class="td-cat"><span class="cat">' + esc(spot.cat) + '</span></td>' +
         '<td class="td-name"><span class="spot-name">' + esc(spot.name) + '</span>' + lootHtml + '</td>' +
-        '<td class="td-file"><span class="cell-k">建議檔名</span><div class="fname"><code>' + esc(file).replace(/_01\.jpg$/, '<wbr>_01.jpg') +
-        '</code><button type="button" class="copy" data-copy="' + esc(filenameWithoutExt(file)) + '">複製</button></div></td>' +
+        '<td class="td-file"><span class="cell-k">建議檔名</span><div class="fname"><code>' + esc(file).replace(/_01$/, '<wbr>_01') +
+        '</code><button type="button" class="copy" data-copy="' + esc(file) + '">複製</button></div></td>' +
         '<td class="td-ticks"><span class="cell-k">自行勾選</span><div class="ticks">' + boxes + '</div></td>' +
         '<td class="td-lamp"><span class="cell-k">燈號</span><p class="lamp' + lampClass +
         '" aria-label="' + lampLabel + '"><i class="dot" aria-hidden="true"></i>' + lampText + '</p></td></tr>';

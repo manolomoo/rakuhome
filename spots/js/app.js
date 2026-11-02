@@ -74,6 +74,10 @@
     return nfc(ward) + '_' + nfc(cat) + '_' + nfc(name) + '_01.jpg';
   }
 
+  function filenameWithoutExt(file) {
+    return String(file == null ? '' : file).replace(/\.(jpe?g|png|webp|gif|heic|heif|bmp|tiff?|avif|svg|jfif)$/i, '');
+  }
+
   function asFile(file) {
     if (typeof globalThis !== 'undefined' && globalThis.SpotsRpg && typeof globalThis.SpotsRpg.asFile === 'function') {
       return globalThis.SpotsRpg.asFile(file);
@@ -1704,7 +1708,7 @@
         '<td class="td-cat"><span class="cat">' + esc(spot.cat) + '</span></td>' +
         '<td class="td-name"><span class="spot-name">' + esc(spot.name) + '</span>' + lootHtml + '</td>' +
         '<td class="td-file"><span class="cell-k">建議檔名</span><div class="fname"><code>' + esc(file).replace(/_01\.jpg$/, '<wbr>_01.jpg') +
-        '</code><button type="button" class="copy" data-copy="' + esc(file) + '">複製</button></div></td>' +
+        '</code><button type="button" class="copy" data-copy="' + esc(filenameWithoutExt(file)) + '">複製</button></div></td>' +
         '<td class="td-ticks"><span class="cell-k">自行勾選</span><div class="ticks">' + boxes + '</div></td>' +
         '<td class="td-lamp"><span class="cell-k">燈號</span><p class="lamp' + lampClass +
         '" aria-label="' + lampLabel + '"><i class="dot" aria-hidden="true"></i>' + lampText + '</p></td></tr>';
@@ -2016,7 +2020,7 @@
     var copyBtn = event.target.closest('button[data-copy]');
     if (copyBtn) {
       event.preventDefault();
-      writeClipboard(copyBtn.getAttribute('data-copy') || '').then(function (ok) {
+      writeClipboard(filenameWithoutExt(copyBtn.getAttribute('data-copy') || '')).then(function (ok) {
         flashCopy(copyBtn, ok);
       });
       return;

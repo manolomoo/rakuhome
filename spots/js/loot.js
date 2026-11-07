@@ -10,18 +10,18 @@
   var SPOT_DROP_CHANCE = 40;
   var SPOT_DRY_LIMIT = 3;
   var DEFAULT_RARITIES = [
-    { id: 'common', name: '普通', rank: 1 },
-    { id: 'rare', name: '稀有', rank: 2 },
-    { id: 'epic', name: '史詩', rank: 3 },
-    { id: 'legendary', name: '傳說', rank: 4 }
+    { id: 'common', name: '專櫃款', rank: 1 },
+    { id: 'rare', name: '限量款', rank: 2 },
+    { id: 'epic', name: 'VIP 限定', rank: 3 },
+    { id: 'legendary', name: '傳家之寶', rank: 4 }
   ];
   var DEFAULT_CATEGORIES = [
-    { id: 'weapon', name: '武器', slot: 'weapon' },
-    { id: 'magic', name: '魔法/技能', slot: 'magic' },
-    { id: 'armor', name: '防具/飾品', slot: 'armor' },
-    { id: 'consumable', name: '消耗道具', slot: '' }
+    { id: 'weapon', name: '名牌包', slot: 'weapon' },
+    { id: 'magic', name: '社交技', slot: 'magic' },
+    { id: 'armor', name: '珠寶行頭', slot: 'armor' },
+    { id: 'consumable', name: '下午茶與小確幸', slot: '' }
   ];
-  var DEFAULT_STATS = ['攻擊', '魔力', '防禦', '敏捷', '幸運'];
+  var DEFAULT_STATS = ['氣場', '魅力', '品味', '手速', '貴人運'];
   var DEFAULT_TABLES = {
     spot: [
       { rarity: 'common', weight: 620 },

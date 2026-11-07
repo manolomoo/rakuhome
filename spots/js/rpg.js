@@ -6,13 +6,13 @@
   'use strict';
 
   var DEFAULT_STAGES = [
-    { tier: 1, name: '小怪' },
-    { tier: 2, name: '精英怪' },
-    { tier: 3, name: '魔王' }
+    { tier: 1, name: '週年慶' },
+    { tier: 2, name: 'VIP 之夜' },
+    { tier: 3, name: '大魔王櫃姐' }
   ];
 
   var DEFAULT_CLASSES = [
-    { level: 1, name: '見習攝影師', blurb: '' }
+    { level: 1, name: '小資女', blurb: '' }
   ];
 
   function pad2(value) {

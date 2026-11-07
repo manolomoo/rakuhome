@@ -1,601 +1,838 @@
 {
-  "stats": ["攻擊", "魔力", "防禦", "敏捷", "幸運"],
+  "stats": [
+    "氣場",
+    "魅力",
+    "品味",
+    "手速",
+    "貴人運"
+  ],
   "rarities": [
-    { "id": "common", "name": "普通", "rank": 1 },
-    { "id": "rare", "name": "稀有", "rank": 2 },
-    { "id": "epic", "name": "史詩", "rank": 3 },
-    { "id": "legendary", "name": "傳說", "rank": 4 }
+    {
+      "id": "common",
+      "name": "專櫃款",
+      "rank": 1
+    },
+    {
+      "id": "rare",
+      "name": "限量款",
+      "rank": 2
+    },
+    {
+      "id": "epic",
+      "name": "VIP 限定",
+      "rank": 3
+    },
+    {
+      "id": "legendary",
+      "name": "傳家之寶",
+      "rank": 4
+    }
   ],
   "categories": [
-    { "id": "weapon", "name": "武器", "slot": "weapon" },
-    { "id": "magic", "name": "魔法/技能", "slot": "magic" },
-    { "id": "armor", "name": "防具/飾品", "slot": "armor" },
-    { "id": "consumable", "name": "消耗道具", "slot": "" }
+    {
+      "id": "weapon",
+      "name": "名牌包",
+      "slot": "weapon"
+    },
+    {
+      "id": "magic",
+      "name": "社交技",
+      "slot": "magic"
+    },
+    {
+      "id": "armor",
+      "name": "珠寶行頭",
+      "slot": "armor"
+    },
+    {
+      "id": "consumable",
+      "name": "下午茶與小確幸",
+      "slot": ""
+    }
   ],
   "dropTables": {
     "spot": [
-      { "rarity": "common", "weight": 600 },
-      { "rarity": "rare", "weight": 275 },
-      { "rarity": "epic", "weight": 95 },
-      { "rarity": "legendary", "weight": 30 }
+      {
+        "rarity": "common",
+        "weight": 600
+      },
+      {
+        "rarity": "rare",
+        "weight": 275
+      },
+      {
+        "rarity": "epic",
+        "weight": 95
+      },
+      {
+        "rarity": "legendary",
+        "weight": 30
+      }
     ],
     "boss": [
-      { "rarity": "epic", "weight": 70 },
-      { "rarity": "legendary", "weight": 30 }
+      {
+        "rarity": "epic",
+        "weight": 70
+      },
+      {
+        "rarity": "legendary",
+        "weight": 30
+      }
     ],
     "achievement": [
-      { "rarity": "rare", "weight": 45 },
-      { "rarity": "epic", "weight": 40 },
-      { "rarity": "legendary", "weight": 15 }
+      {
+        "rarity": "rare",
+        "weight": 45
+      },
+      {
+        "rarity": "epic",
+        "weight": 40
+      },
+      {
+        "rarity": "legendary",
+        "weight": 15
+      }
     ]
   },
   "items": [
     {
       "id": "phone-stand-sword",
-      "name": "手機腳架短劍",
+      "name": "專櫃小零錢包",
       "category": "weapon",
       "rarity": "common",
-      "icon": "🗡️",
-      "description": "三腳架折到最短，專治忘了帶腳架的自己。",
-      "stats": { "攻擊": 3 }
+      "icon": "👛",
+      "description": "裝得下悠遊卡跟一支口紅，剛剛好的優雅。",
+      "stats": {
+        "氣場": 3
+      }
     },
     {
       "id": "polaroid-knife",
-      "name": "拍立得飛刀",
+      "name": "帆布托特包",
       "category": "weapon",
       "rarity": "common",
-      "icon": "📷",
-      "description": "先吐出一張照片，再決定這刀要不要中。",
-      "stats": { "攻擊": 2, "幸運": 1 }
+      "icon": "👝",
+      "description": "印著精品店 logo 的那種，買東西送的也算名牌。",
+      "stats": {
+        "氣場": 2,
+        "貴人運": 1
+      }
     },
     {
       "id": "card-cutter",
-      "name": "名片切紙刀",
+      "name": "真皮名片夾",
       "category": "weapon",
       "rarity": "common",
-      "icon": "🔪",
-      "description": "仲介名片厚到可以開箱，邊角還印著電話。",
-      "stats": { "攻擊": 3 }
+      "icon": "💼",
+      "description": "遞出去的那一刻，對方先記住的是皮革香。",
+      "stats": {
+        "氣場": 3
+      }
     },
     {
       "id": "key-flail",
-      "name": "鑰匙串流星錘",
+      "name": "名牌鑰匙圈",
       "category": "weapon",
       "rarity": "common",
       "icon": "🔑",
-      "description": "甩出去的聲音比傷害更有存在感，玄關先投降。",
-      "stats": { "攻擊": 2, "敏捷": 1 }
+      "description": "掛在包包上晃呀晃，比包本身還吸睛。",
+      "stats": {
+        "氣場": 2,
+        "手速": 1
+      }
     },
     {
       "id": "umbrella-lance",
-      "name": "摺疊傘突刺",
+      "name": "品牌晴雨傘",
       "category": "weapon",
       "rarity": "common",
-      "icon": "☔",
-      "description": "東京午後限定。收起來的時候，只是有點濕。",
-      "stats": { "攻擊": 3 }
+      "icon": "☂️",
+      "description": "下雨天也要有型，傘柄上的金扣最重要。",
+      "stats": {
+        "氣場": 3
+      }
     },
     {
       "id": "cork-saber",
-      "name": "軟木塞氣泡劍",
+      "name": "香檳手拿包",
       "category": "weapon",
       "rarity": "common",
       "icon": "🍾",
-      "description": "交屋開幕用的。氣泡通常比劍先到現場。",
-      "stats": { "攻擊": 2, "幸運": 1 }
+      "description": "派對限定。拿著它，連服務生都先遞酒給你。",
+      "stats": {
+        "氣場": 2,
+        "貴人運": 1
+      }
     },
     {
       "id": "wide-axe",
-      "name": "廣角鏡頭巨斧",
+      "name": "經典菱格紋包",
       "category": "weapon",
       "rarity": "rare",
-      "icon": "🪓",
-      "description": "視野廣到連隔壁棟的缺點都一起砍進畫面。",
-      "stats": { "攻擊": 6, "幸運": 1 }
+      "icon": "👜",
+      "description": "鍊條一甩，整條表參道都回頭。",
+      "stats": {
+        "氣場": 6,
+        "貴人運": 1
+      }
     },
     {
       "id": "dslr-greatsword",
-      "name": "單眼相機大劍",
+      "name": "凱莉風手提包",
       "category": "weapon",
       "rarity": "rare",
-      "icon": "📷",
-      "description": "對焦環是劍柄，快門是必殺。握穩就不會糊。",
-      "stats": { "攻擊": 7 }
+      "icon": "👜",
+      "description": "排隊排來的，提著就自帶背景音樂。",
+      "stats": {
+        "氣場": 7
+      }
     },
     {
       "id": "laser-lance",
-      "name": "雷射測距長槍",
+      "name": "百貨公司提袋組",
       "category": "weapon",
       "rarity": "rare",
-      "icon": "📏",
-      "description": "先量準再刺。誤差會被寫進報價單，所以很痛。",
-      "stats": { "攻擊": 5, "敏捷": 2 }
+      "icon": "🛍️",
+      "description": "左右手各三袋，平衡感是貴婦的基本功。",
+      "stats": {
+        "氣場": 5,
+        "手速": 2
+      }
     },
     {
       "id": "stamp-bow",
-      "name": "房仲印章連弩",
+      "name": "黑卡卡夾",
       "category": "weapon",
       "rarity": "rare",
-      "icon": "🏹",
-      "description": "每蓋一次章，就射出一張看房單。",
-      "stats": { "攻擊": 5, "幸運": 3 }
+      "icon": "💳",
+      "description": "卡夾一打開，櫃姐的笑容自動升級。",
+      "stats": {
+        "氣場": 5,
+        "貴人運": 3
+      }
     },
     {
       "id": "whiteboard-hammer",
-      "name": "看房白板重錘",
+      "name": "行李箱級購物袋",
       "category": "weapon",
       "rarity": "rare",
-      "icon": "🪧",
-      "description": "寫滿優點的那一面特別沉，缺點用小字。",
-      "stats": { "攻擊": 8 }
+      "icon": "🧳",
+      "description": "逛一趟銀座的份量，司機會幫忙提。",
+      "stats": {
+        "氣場": 8
+      }
     },
     {
       "id": "tripod-trident",
-      "name": "腳架三叉戟",
+      "name": "鱷魚皮柏金包",
       "category": "weapon",
       "rarity": "epic",
-      "icon": "🔱",
-      "description": "三隻腳各鎖一個拍點，一次收齊三張。",
-      "stats": { "攻擊": 10, "敏捷": 2 }
+      "icon": "👜",
+      "description": "等了三年的配貨，終於輪到你。",
+      "stats": {
+        "氣場": 10,
+        "手速": 2
+      }
     },
     {
       "id": "reflector-boomerang",
-      "name": "反光板迴旋鏢",
+      "name": "鑲鑽晚宴包",
       "category": "weapon",
       "rarity": "epic",
-      "icon": "🥏",
-      "description": "補完光會自己飛回背包，臉也不會黑一半。",
-      "stats": { "攻擊": 9, "幸運": 3 }
+      "icon": "✨",
+      "description": "燈光一打，閃到隔壁桌忘了點菜。",
+      "stats": {
+        "氣場": 9,
+        "貴人運": 3
+      }
     },
     {
       "id": "train-door-clamp",
-      "name": "電車門夾擊鉗",
+      "name": "私人司機接送券",
       "category": "weapon",
       "rarity": "epic",
-      "icon": "🚇",
-      "description": "關門音樂一響，傷害直接結算，請勿衝門。",
-      "stats": { "攻擊": 11, "敏捷": 1 }
+      "icon": "🚗",
+      "description": "不用擠電車，車門有人幫你開。",
+      "stats": {
+        "氣場": 11,
+        "手速": 1
+      }
     },
     {
       "id": "tower-antenna",
-      "name": "東京鐵塔天線槍",
+      "name": "限量聯名柏金包",
       "category": "weapon",
       "rarity": "legendary",
-      "icon": "🗼",
-      "description": "從展望台借來的。射程含觀景台，也含夕陽。",
-      "stats": { "攻擊": 14, "幸運": 4 }
+      "icon": "👑",
+      "description": "全球只有十個，你拿的是第一號。",
+      "stats": {
+        "氣場": 14,
+        "貴人運": 4
+      }
     },
     {
       "id": "skytree-slash",
-      "name": "晴空塔垂直斬",
+      "name": "頂樓豪宅鑰匙包",
       "category": "weapon",
       "rarity": "legendary",
       "icon": "🏙️",
-      "description": "從展望台砍到一樓大廳，租金跟著往下掉一階。",
-      "stats": { "攻擊": 15, "敏捷": 3 }
+      "description": "打開它，裡面裝著整個東京夜景。",
+      "stats": {
+        "氣場": 15,
+        "手速": 3
+      }
     },
     {
       "id": "onigiri-mend",
-      "name": "御飯糰回覆術",
+      "name": "臉部保養術",
       "category": "magic",
       "rarity": "common",
-      "icon": "🍙",
-      "description": "捏一顆，血條就假裝自己吃飽了。",
-      "stats": { "魔力": 2, "幸運": 1 }
+      "icon": "💆",
+      "description": "敷完面膜，氣色先替你打招呼。",
+      "stats": {
+        "魅力": 2,
+        "貴人運": 1
+      }
     },
     {
       "id": "vending-summon",
-      "name": "自動販賣機召喚",
+      "name": "一通電話訂位",
       "category": "magic",
       "rarity": "common",
-      "icon": "🥤",
-      "description": "巷口一定有一台。這是東京比較可靠的地理魔法。",
-      "stats": { "魔力": 3 }
+      "icon": "📞",
+      "description": "米其林說客滿？你打一通就有位子。",
+      "stats": {
+        "魅力": 3
+      }
     },
     {
       "id": "announce-chant",
-      "name": "車上廣播詠唱",
+      "name": "優雅寒暄術",
       "category": "magic",
       "rarity": "common",
-      "icon": "📢",
-      "description": "「下一站」念完，不相關的魔王也會跟著下車。",
-      "stats": { "魔力": 2, "敏捷": 1 }
+      "icon": "🗣️",
+      "description": "「哎呀好久不見」說完，全場都是老朋友。",
+      "stats": {
+        "魅力": 2,
+        "手速": 1
+      }
     },
     {
       "id": "wifi-sense",
-      "name": "免費網路探知",
+      "name": "團購情報網",
       "category": "magic",
       "rarity": "common",
-      "icon": "📶",
-      "description": "訊號格數就是魔力槽。咖啡廳密碼通常寫在牆上。",
-      "stats": { "魔力": 2, "幸運": 1 }
+      "icon": "📱",
+      "description": "哪裡有特價、哪家有新品，群組第一個知道。",
+      "stats": {
+        "魅力": 2,
+        "貴人運": 1
+      }
     },
     {
       "id": "bento-spark",
-      "name": "加熱便當火種",
+      "name": "光療美甲術",
       "category": "magic",
       "rarity": "common",
-      "icon": "🍱",
-      "description": "微波爐叮的一聲，小火球連同醬汁一起出爐。",
-      "stats": { "魔力": 3 }
+      "icon": "💅",
+      "description": "指尖一亮，拿茶杯的姿勢都變貴了。",
+      "stats": {
+        "魅力": 3
+      }
     },
     {
       "id": "stamp-rally",
-      "name": "集章小魔法",
+      "name": "集點卡魔法",
       "category": "magic",
       "rarity": "common",
       "icon": "💮",
-      "description": "蓋滿才有效。少一站，魔法就當你還在找出口。",
-      "stats": { "魔力": 2, "幸運": 2 }
+      "description": "集滿就換禮，貴婦也懂精打細算。",
+      "stats": {
+        "魅力": 2,
+        "貴人運": 2
+      }
     },
     {
       "id": "wagyu-fireball",
-      "name": "和牛烤肉火球術",
+      "name": "香檳乾杯術",
       "category": "magic",
       "rarity": "rare",
-      "icon": "🔥",
-      "description": "油花濺起來的時候，法術才算完整。請自備圍兜。",
-      "stats": { "魔力": 7, "幸運": 1 }
+      "icon": "🥂",
+      "description": "杯子一碰，生意跟友情一起談成。",
+      "stats": {
+        "魅力": 7,
+        "貴人運": 1
+      }
     },
     {
       "id": "timetable-tome",
-      "name": "電車時刻表之書",
+      "name": "精品新品型錄",
       "category": "magic",
       "rarity": "rare",
       "icon": "📖",
-      "description": "翻到對的那頁，整座車站會幫你把步伐對上發車鈴。",
-      "stats": { "魔力": 5, "敏捷": 3 }
+      "description": "翻到哪頁，下一季就穿到哪。",
+      "stats": {
+        "魅力": 5,
+        "手速": 3
+      }
     },
     {
       "id": "noren-cloak-spell",
-      "name": "暖簾隱身術",
+      "name": "墨鏡低調術",
       "category": "magic",
       "rarity": "rare",
-      "icon": "🎌",
-      "description": "布簾一掀，路人甲就看不見你，老闆仍看得到點菜單。",
-      "stats": { "魔力": 6, "幸運": 2 }
+      "icon": "🕶️",
+      "description": "戴上就沒人認得你，除了櫃姐。",
+      "stats": {
+        "魅力": 6,
+        "貴人運": 2
+      }
     },
     {
       "id": "matcha-ward",
-      "name": "抹茶結界",
+      "name": "茶道優雅結界",
       "category": "magic",
       "rarity": "rare",
       "icon": "🍵",
-      "description": "苦味本身就是防壁。加糖的人防禦會下降，這是規矩。",
-      "stats": { "魔力": 6, "防禦": 2 }
+      "description": "正坐三分鐘，氣質直接加滿。",
+      "stats": {
+        "魅力": 6,
+        "品味": 2
+      }
     },
     {
       "id": "flash-blind",
-      "name": "閃光燈致盲術",
+      "name": "網美拍照術",
       "category": "magic",
       "rarity": "rare",
       "icon": "📸",
-      "description": "連拍三張，對面的魔王只剩殘影，和一點不好意思。",
-      "stats": { "魔力": 5, "幸運": 3 }
+      "description": "一張照片，按讚數比房租還高。",
+      "stats": {
+        "魅力": 5,
+        "貴人運": 3
+      }
     },
     {
       "id": "onsen-circle",
-      "name": "溫泉回復陣",
+      "name": "溫泉 SPA 療程",
       "category": "magic",
       "rarity": "epic",
       "icon": "♨️",
-      "description": "泡一下，疲勞和對焦失敗一起蒸發。毛巾請自備。",
-      "stats": { "魔力": 9, "防禦": 3 }
+      "description": "泡完全身發光，連毛孔都在微笑。",
+      "stats": {
+        "魅力": 9,
+        "品味": 3
+      }
     },
     {
       "id": "ema-wish",
-      "name": "繪馬許願術",
+      "name": "貴人運祈福",
       "category": "magic",
       "rarity": "epic",
       "icon": "⛩️",
-      "description": "寫上去的願望，神社會幫你排進行程，不加價。",
-      "stats": { "魔力": 8, "幸運": 5 }
+      "description": "許完願，貴人自動排進你的行事曆。",
+      "stats": {
+        "魅力": 8,
+        "貴人運": 5
+      }
     },
     {
       "id": "crossing-stop",
-      "name": "十字路口時間停止",
+      "name": "VIP 免排隊術",
       "category": "magic",
       "rarity": "epic",
-      "icon": "🚦",
-      "description": "綠燈還沒亮，你已經拍完三張，還幫路人讓出構圖。",
-      "stats": { "魔力": 10, "敏捷": 3 }
+      "icon": "⏳",
+      "description": "人龍很長？你從側門直接入座。",
+      "stats": {
+        "魅力": 10,
+        "手速": 3
+      }
     },
     {
       "id": "fuji-clear",
-      "name": "富士山晴天祈願",
+      "name": "名媛晚宴主持",
       "category": "magic",
       "rarity": "legendary",
-      "icon": "🗻",
-      "description": "雲自己讓開。光線會簽過名才來，還附一張明信片。",
-      "stats": { "魔力": 14, "幸運": 5 }
+      "icon": "🌸",
+      "description": "麥克風在手，全場安靜等你開口。",
+      "stats": {
+        "魅力": 14,
+        "貴人運": 5
+      }
     },
     {
       "id": "lifetime-lease",
-      "name": "終身租約詠唱",
+      "name": "終身 VIP 會籍",
       "category": "magic",
       "rarity": "legendary",
       "icon": "📜",
-      "description": "條款念完，房子會自己開門鞠躬，玄關燈也先亮。",
-      "stats": { "魔力": 13, "攻擊": 4, "幸運": 3 }
+      "description": "簽完名，每家店都記得你的喜好。",
+      "stats": {
+        "魅力": 13,
+        "氣場": 4,
+        "貴人運": 3
+      }
     },
     {
       "id": "lanyard-cape",
-      "name": "工作證掛繩披風",
-      "category": "armor",
-      "rarity": "common",
-      "icon": "🪪",
-      "description": "掛著就有人以為你是工作人員，還會幫你按電梯。",
-      "stats": { "防禦": 2, "幸運": 1 }
-    },
-    {
-      "id": "mask-visor",
-      "name": "口罩面甲",
-      "category": "armor",
-      "rarity": "common",
-      "icon": "😷",
-      "description": "擋住風，也擋住不想被拍進樣品屋的表情。",
-      "stats": { "防禦": 3 }
-    },
-    {
-      "id": "walk-shoes",
-      "name": "走跳球鞋",
-      "category": "armor",
-      "rarity": "common",
-      "icon": "👟",
-      "description": "今天的步數就是今天的護甲。水泡不算破防。",
-      "stats": { "防禦": 1, "敏捷": 2 }
-    },
-    {
-      "id": "camera-pouch",
-      "name": "相機內袋護心",
-      "category": "armor",
-      "rarity": "common",
-      "icon": "🎒",
-      "description": "鏡頭朝內，心比較不容易碎，背帶仍然會勒肩膀。",
-      "stats": { "防禦": 3 }
-    },
-    {
-      "id": "station-towel",
-      "name": "車站毛巾披肩",
+      "name": "喀什米爾圍巾",
       "category": "armor",
       "rarity": "common",
       "icon": "🧣",
-      "description": "夏天的護甲，主要負責吸汗，其次才負責好看。",
-      "stats": { "防禦": 2, "幸運": 1 }
+      "description": "輕輕一圍，冬天也變得很溫柔。",
+      "stats": {
+        "品味": 2,
+        "貴人運": 1
+      }
+    },
+    {
+      "id": "mask-visor",
+      "name": "名牌墨鏡",
+      "category": "armor",
+      "rarity": "common",
+      "icon": "🕶️",
+      "description": "遮住素顏，也遮住不想打招呼的人。",
+      "stats": {
+        "品味": 3
+      }
+    },
+    {
+      "id": "walk-shoes",
+      "name": "舒適款高跟鞋",
+      "category": "armor",
+      "rarity": "common",
+      "icon": "👠",
+      "description": "逛一整天也不腳痛，貴婦的秘密武器。",
+      "stats": {
+        "品味": 1,
+        "手速": 2
+      }
+    },
+    {
+      "id": "camera-pouch",
+      "name": "珍珠項鍊",
+      "category": "armor",
+      "rarity": "common",
+      "icon": "📿",
+      "description": "一串戴上，連照片都變柔光。",
+      "stats": {
+        "品味": 3
+      }
+    },
+    {
+      "id": "station-towel",
+      "name": "絲巾披肩",
+      "category": "armor",
+      "rarity": "common",
+      "icon": "🧥",
+      "description": "綁法有十種，每種都很有故事。",
+      "stats": {
+        "品味": 2,
+        "貴人運": 1
+      }
     },
     {
       "id": "ic-shield",
-      "name": "交通卡小盾",
+      "name": "經典女錶",
       "category": "armor",
       "rarity": "common",
-      "icon": "💳",
-      "description": "嗶一聲，閘門就站到你這邊。餘額不足時盾會變薄。",
-      "stats": { "防禦": 2, "敏捷": 1 }
+      "icon": "⌚",
+      "description": "看時間的動作，也是一種優雅。",
+      "stats": {
+        "品味": 2,
+        "手速": 1
+      }
     },
     {
       "id": "konbini-ward",
-      "name": "便利商店結界",
+      "name": "鑽石耳環",
       "category": "armor",
       "rarity": "rare",
-      "icon": "🏪",
-      "description": "二十四小時營業。魔王要打你，也得先排隊結帳。",
-      "stats": { "防禦": 6, "幸運": 2 }
+      "icon": "💎",
+      "description": "微微一閃，對話就從「好美」開始。",
+      "stats": {
+        "品味": 6,
+        "貴人運": 2
+      }
     },
     {
       "id": "izakaya-cape",
-      "name": "居酒屋暖簾斗篷",
+      "name": "羊絨大衣",
       "category": "armor",
       "rarity": "rare",
-      "icon": "🍶",
-      "description": "披上之後，誤闖也會被招待。點錯菜算加防。",
-      "stats": { "防禦": 5, "幸運": 3 }
+      "icon": "🧥",
+      "description": "披上之後，連冷風都對你客氣。",
+      "stats": {
+        "品味": 5,
+        "貴人運": 3
+      }
     },
     {
       "id": "site-helmet",
-      "name": "工地安全帽",
+      "name": "寬簷淑女帽",
       "category": "armor",
       "rarity": "rare",
-      "icon": "⛑️",
-      "description": "看房時掉下來的不是磚，是一份比較安心的報價。",
-      "stats": { "防禦": 7, "攻擊": 1 }
+      "icon": "👒",
+      "description": "遮陽兼氣場，下午茶必備。",
+      "stats": {
+        "品味": 7,
+        "氣場": 1
+      }
     },
     {
       "id": "commuter-bracer",
-      "name": "定期券護腕",
+      "name": "名牌手環",
       "category": "armor",
       "rarity": "rare",
-      "icon": "🎫",
-      "description": "一刷，月台的風會幫你擋。末班車除外，風也下班。",
-      "stats": { "防禦": 4, "敏捷": 4 }
+      "icon": "📿",
+      "description": "疊三條才是基本款。",
+      "stats": {
+        "品味": 4,
+        "手速": 4
+      }
     },
     {
       "id": "lens-hood",
-      "name": "遮光罩護額",
+      "name": "真絲髮飾",
       "category": "armor",
       "rarity": "rare",
-      "icon": "🛡️",
-      "description": "逆光打過來，先被這圈吃掉，臉才不會變成剪影。",
-      "stats": { "防禦": 6, "幸運": 1 }
+      "icon": "🎀",
+      "description": "髮型一定位，自拍角度都對了。",
+      "stats": {
+        "品味": 6,
+        "貴人運": 1
+      }
     },
     {
       "id": "geta-mail",
-      "name": "神社木屐甲",
+      "name": "訂製和服",
       "category": "armor",
       "rarity": "epic",
-      "icon": "🩴",
-      "description": "喀啦喀啦的聲音自帶驅邪。石階會主動讓你一點。",
-      "stats": { "防禦": 8, "幸運": 4 }
+      "icon": "👘",
+      "description": "京都限定，走在花見小路自動成為風景。",
+      "stats": {
+        "品味": 8,
+        "貴人運": 4
+      }
     },
     {
       "id": "model-room-plate",
-      "name": "樣品屋全身甲",
+      "name": "高級訂製禮服",
       "category": "armor",
       "rarity": "epic",
-      "icon": "🏠",
-      "description": "家具都是假的，防禦是真的。請勿坐下，椅子會叫。",
-      "stats": { "防禦": 11, "魔力": 2 }
+      "icon": "👗",
+      "description": "量身打造，紅毯都怕你走太快。",
+      "stats": {
+        "品味": 11,
+        "魅力": 2
+      }
     },
     {
       "id": "seal-ring",
-      "name": "印鑑戒指",
+      "name": "鴿子蛋鑽戒",
       "category": "armor",
       "rarity": "epic",
       "icon": "💍",
-      "description": "蓋下去的那一下，契約自己站好，筆也會找過來。",
-      "stats": { "防禦": 7, "幸運": 5 }
+      "description": "手一抬，全場的燈好像都暗了。",
+      "stats": {
+        "品味": 7,
+        "貴人運": 5
+      }
     },
     {
       "id": "torii-cape",
-      "name": "鳥居大門披風",
+      "name": "皇室級皮草披風",
       "category": "armor",
       "rarity": "legendary",
-      "icon": "⛩️",
-      "description": "穿過之後，壞天氣會在門外等，拍照的人都讓出中線。",
-      "stats": { "防禦": 12, "幸運": 5, "魔力": 2 }
+      "icon": "🦚",
+      "description": "據說某位公主也穿過同款。",
+      "stats": {
+        "品味": 12,
+        "貴人運": 5,
+        "魅力": 2
+      }
     },
     {
       "id": "keybox-aegis",
-      "name": "玄關鑰匙盒聖甲",
+      "name": "傳家珠寶冠冕",
       "category": "armor",
       "rarity": "legendary",
-      "icon": "🔐",
-      "description": "密碼對了，整棟樓認你做主人，連鞋拔都鞠躬。",
-      "stats": { "防禦": 13, "攻擊": 3, "敏捷": 2 }
+      "icon": "👑",
+      "description": "奶奶傳下來的，價值無法估算。",
+      "stats": {
+        "品味": 13,
+        "氣場": 3,
+        "手速": 2
+      }
     },
     {
       "id": "pocket-onigiri",
-      "name": "便利商店飯糰",
+      "name": "杯子蛋糕",
       "category": "consumable",
       "rarity": "common",
-      "icon": "🍙",
-      "description": "吃完會暫時相信自己找得到出口。海苔那面朝外。",
-      "stats": { "幸運": 1 }
+      "icon": "🧁",
+      "description": "一口甜，心情先升級。",
+      "stats": {
+        "貴人運": 1
+      }
     },
     {
       "id": "can-coffee",
-      "name": "罐裝咖啡",
+      "name": "手沖精品咖啡",
       "category": "consumable",
       "rarity": "common",
       "icon": "☕",
-      "description": "熱的那罐專門對付清晨的快門。拉環是起動儀式。",
-      "stats": { "敏捷": 1 }
+      "description": "香氣比咖啡因先叫醒你。",
+      "stats": {
+        "手速": 1
+      }
     },
     {
       "id": "bottle-tea",
-      "name": "寶特瓶綠茶",
+      "name": "玉露煎茶",
       "category": "consumable",
       "rarity": "common",
       "icon": "🍵",
-      "description": "補水，也補一點還沒寫完的看房筆記。",
-      "stats": { "魔力": 1 }
+      "description": "小口小口喝，才有貴婦的節奏。",
+      "stats": {
+        "魅力": 1
+      }
     },
     {
       "id": "platform-choc",
-      "name": "月台巧克力",
+      "name": "比利時松露巧克力",
       "category": "consumable",
       "rarity": "common",
       "icon": "🍫",
-      "description": "誤車的時候，至少口袋是甜的。下一班會原諒你。",
-      "stats": { "幸運": 1 }
+      "description": "一顆就好，多吃算你的。",
+      "stats": {
+        "貴人運": 1
+      }
     },
     {
       "id": "spare-battery",
-      "name": "備用電池",
+      "name": "補妝口紅",
       "category": "consumable",
       "rarity": "common",
-      "icon": "🔋",
-      "description": "沒電的相機比魔王還可怕。這一顆先把魔王按住。",
-      "stats": { "攻擊": 1 }
+      "icon": "💄",
+      "description": "隨時補色，氣場不斷電。",
+      "stats": {
+        "氣場": 1
+      }
     },
     {
       "id": "day-pass",
-      "name": "一日券",
+      "name": "百貨公司貴賓券",
       "category": "consumable",
       "rarity": "common",
-      "icon": "🎫",
-      "description": "撕開的聲音就是今天的起跑。過期就變回一張紙。",
-      "stats": { "敏捷": 1 }
+      "icon": "🎟️",
+      "description": "一張在手，整層樓的櫃姐都認識你。",
+      "stats": {
+        "手速": 1
+      }
     },
     {
       "id": "wet-wipe",
-      "name": "濕紙巾",
+      "name": "玫瑰香水小樣",
       "category": "consumable",
       "rarity": "common",
-      "icon": "🧼",
-      "description": "拍完拉麵店，手還能握住快門。醬汁不計入經驗。",
-      "stats": { "防禦": 1 }
+      "icon": "🌹",
+      "description": "噴一下，走過的地方都留香。",
+      "stats": {
+        "品味": 1
+      }
     },
     {
       "id": "taiyaki",
-      "name": "鯛魚燒",
+      "name": "法式馬卡龍",
       "category": "consumable",
       "rarity": "rare",
-      "icon": "🐟",
-      "description": "尾巴的餡最多，幸運也最多。頭是給同行的人。",
-      "stats": { "幸運": 2 }
+      "icon": "🍰",
+      "description": "七種顏色，排成彩虹才能吃。",
+      "stats": {
+        "貴人運": 2
+      }
     },
     {
       "id": "asakusa-omamori",
-      "name": "淺草御守",
+      "name": "開運御守",
       "category": "consumable",
       "rarity": "rare",
       "icon": "🧧",
-      "description": "掛上之後，走錯的巷子會自己轉正。一年請換一次。",
-      "stats": { "幸運": 2 }
+      "description": "掛在包包上，貴人自動找上門。",
+      "stats": {
+        "貴人運": 2
+      }
     },
     {
       "id": "ekiben",
-      "name": "車站便當",
+      "name": "料亭精緻便當",
       "category": "consumable",
       "rarity": "rare",
       "icon": "🍱",
-      "description": "在搖晃的車廂裡吃，經驗值比較實在，芥末也是。",
-      "stats": { "攻擊": 1, "防禦": 1 }
+      "description": "盒子比便當還漂亮。",
+      "stats": {
+        "氣場": 1,
+        "品味": 1
+      }
     },
     {
       "id": "ramune",
-      "name": "彈珠汽水",
+      "name": "氣泡香檳一杯",
       "category": "consumable",
       "rarity": "rare",
-      "icon": "🫧",
-      "description": "彈珠壓下去，腳步會輕一點。氣泡負責鼓掌。",
-      "stats": { "敏捷": 2 }
+      "icon": "🥂",
+      "description": "氣泡一冒，心情跟著飄起來。",
+      "stats": {
+        "手速": 2
+      }
     },
     {
       "id": "expired-film",
-      "name": "過期底片",
+      "name": "名牌香水",
       "category": "consumable",
       "rarity": "rare",
-      "icon": "🎞️",
-      "description": "不保證成像，保證故事比較好。偏色算風格。",
-      "stats": { "魔力": 2 }
+      "icon": "🌷",
+      "description": "一噴就是一整季的回憶。",
+      "stats": {
+        "魅力": 2
+      }
     },
     {
       "id": "wagyu-bento",
-      "name": "和牛便當",
+      "name": "A5 和牛晚餐券",
       "category": "consumable",
       "rarity": "epic",
       "icon": "🥩",
-      "description": "打開的瞬間，附近的人會轉頭。請注意社會性閃光。",
-      "stats": { "攻擊": 2, "幸運": 1 }
+      "description": "打開的瞬間，隔壁桌都在看。",
+      "stats": {
+        "氣場": 2,
+        "貴人運": 1
+      }
     },
     {
       "id": "onsen-ticket",
-      "name": "溫泉入浴券",
+      "name": "高級溫泉旅館住宿券",
       "category": "consumable",
       "rarity": "epic",
       "icon": "♨️",
-      "description": "泡完，疲勞條歸零。行程表不會，它比較記仇。",
-      "stats": { "防禦": 2, "魔力": 1 }
+      "description": "泡完，疲勞跟煩惱一起蒸發。",
+      "stats": {
+        "品味": 2,
+        "魅力": 1
+      }
     },
     {
       "id": "fuji-postcard",
-      "name": "富士山明信片",
+      "name": "飯店下午茶券",
       "category": "consumable",
       "rarity": "epic",
-      "icon": "🗻",
-      "description": "寄出去之前，天氣會先看過一眼，再決定出不出現。",
-      "stats": { "魔力": 1, "幸運": 2 }
+      "icon": "🫖",
+      "description": "三層點心塔，從下往上吃才優雅。",
+      "stats": {
+        "魅力": 1,
+        "貴人運": 2
+      }
     },
     {
       "id": "gold-viewing",
@@ -603,8 +840,13 @@
       "category": "consumable",
       "rarity": "legendary",
       "icon": "✉️",
-      "description": "房子會提前開門，連玄關燈都幫你開好，拖鞋已排齊。",
-      "stats": { "攻擊": 1, "魔力": 1, "防禦": 1, "幸運": 1 }
+      "description": "頂樓豪宅提前為你開門，拖鞋已排齊。",
+      "stats": {
+        "氣場": 1,
+        "魅力": 1,
+        "品味": 1,
+        "貴人運": 1
+      }
     }
   ]
 }

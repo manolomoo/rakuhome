@@ -761,10 +761,10 @@
       html += '<p class="banner">稱號資料讀取失敗，徽章暫時無法顯示。</p>';
     }
     if (model.rpgError) {
-      html += '<p class="banner">冒險資料讀取失敗，等級暫時無法顯示。</p>';
+      html += '<p class="banner">貴婦資料讀取失敗，段位暫時無法顯示。</p>';
     }
     if (model.lootError) {
-      html += '<p class="banner">戰利品資料讀取失敗，掉落暫時無法顯示。</p>';
+      html += '<p class="banner">戰利品資料讀取失敗，精品暫時無法顯示。</p>';
     }
     return html;
   }
@@ -799,7 +799,7 @@
       '<p class="pct num">' + pct(done, total) + '%</p></div>' +
       '<div class="bar lg" role="progressbar" aria-valuemin="0" aria-valuemax="' + total + '" aria-valuenow="' + done + '" aria-label="' + esc(label) + '">' +
       bar + '</div>' + split +
-      '<p class="hint">勾一下立刻 +3，也算完成這個景點，標成待確認。雲端第一張 +10，多拍的每一張再 +5，燈號轉綠就是雲端認證。兩邊經驗加在一起，稱號、魔王和寶箱也是。</p></section>';
+      '<p class="hint">勾一下立刻 +3，也算完成這個景點，標成待確認。雲端第一張 +10，多拍的每一張再 +5，燈號轉綠就是雲端認證。兩邊優雅值加在一起，稱號、大魔王櫃姐和禮物盒也是。</p></section>';
   }
 
   function noteBlock(text) {
@@ -972,9 +972,9 @@
       if (!found && stage.tier === tier) found = stage.name;
     });
     if (found) return found;
-    if (tier === 1) return '小怪';
-    if (tier === 2) return '精英怪';
-    if (tier === 3) return '魔王';
+    if (tier === 1) return '週年慶';
+    if (tier === 2) return 'VIP 之夜';
+    if (tier === 3) return '大魔王櫃姐';
     return '';
   }
 
@@ -1034,15 +1034,15 @@
     var level = score.level;
     var role = score.classInfo.current;
     var width = level.span ? (level.into / level.span) * 100 : 0;
-    var label = '等級 ' + level.level + '，' + role.name + '，經驗 ' + level.total + '，下一級 ' + level.nextXp +
+    var label = '貴婦段位 ' + level.level + '，' + role.name + '，優雅值 ' + level.total + '，下一級 ' + level.nextXp +
       '，手勾 ' + score.manualXp + '，雲端認證 ' + score.cloudXp;
     return '<section class="xpbar" aria-label="' + esc(label) + '">' +
       '<p class="xp-lv num"><b>Lv.' + level.level + '</b><span>' + esc(role.name) + '</span></p>' +
       '<div class="xp-track"><div class="bar lg" role="progressbar" aria-valuemin="0" aria-valuemax="' + level.span +
-      '" aria-valuenow="' + level.into + '" aria-label="升級進度"><span style="width:' + width + '%"></span></div>' +
+      '" aria-valuenow="' + level.into + '" aria-label="晉升進度"><span style="width:' + width + '%"></span></div>' +
       '<p class="xp-ratio num"><b>' + level.total + '</b><span> / ' + level.nextXp + '</span></p></div>' +
-      '<p class="xp-split"><span class="is-pending">手勾 XP ' + score.manualXp + '</span>' +
-      '<span class="is-cloud">雲端認證 XP ' + score.cloudXp + '</span></p></section>';
+      '<p class="xp-split"><span class="is-pending">手勾優雅值 ' + score.manualXp + '</span>' +
+      '<span class="is-cloud">雲端認證優雅值 ' + score.cloudXp + '</span></p></section>';
   }
 
   function sheetHtml(score, equipped, titleCount, titleTotal) {
@@ -1050,8 +1050,8 @@
     var role = score.classInfo.current;
     var next = score.classInfo.next;
     var nextLine = next
-      ? '<p class="sheet-next">下一職 ' + esc(next.name) + ' · Lv.' + next.level + '</p>'
-      : '<p class="sheet-next">職業已經登頂，再走也是傳說。</p>';
+      ? '<p class="sheet-next">下一段位 ' + esc(next.name) + ' · Lv.' + next.level + '</p>'
+      : '<p class="sheet-next">已經是貴婦天花板，再逛也是傳說。</p>';
     var titleHtml;
     if (equipped) {
       titleHtml = medalHtml(equipped.icon, equipped.scope, equipped.tier, true) +
@@ -1073,13 +1073,13 @@
         '<span class="is-pending">待確認 ' + city.pendingDone + '</span></p></li>';
     }).join('');
     return '<section class="sheet" aria-labelledby="sheet-title">' +
-      '<div class="sheet-id"><p class="kicker" id="sheet-title">角色卡</p>' +
+      '<div class="sheet-id"><p class="kicker" id="sheet-title">貴婦名片</p>' +
       '<p class="sheet-lv num">Lv.' + score.level.level + '</p>' +
       '<h2 class="sheet-class">' + esc(role.name) + '</h2>' +
       (role.blurb ? '<p class="sheet-blurb">' + esc(role.blurb) + '</p>' : '') +
       nextLine +
-      '<p class="xp-split sheet-xp"><span class="is-pending">手勾 XP ' + score.manualXp + '</span>' +
-      '<span class="is-cloud">雲端認證 XP ' + score.cloudXp + '</span></p>' +
+      '<p class="xp-split sheet-xp"><span class="is-pending">手勾優雅值 ' + score.manualXp + '</span>' +
+      '<span class="is-cloud">雲端認證優雅值 ' + score.cloudXp + '</span></p>' +
       '<p class="sheet-title-line"><span>最新稱號</span>' + titleHtml + '</p>' +
       '<p class="sheet-count">稱號 <b class="num">' + titleCount + '</b><span> / ' + titleTotal + '</span></p></div>' +
       '<div class="sheet-cities"><p class="kicker">各城完成</p><ul>' + cities + '</ul></div>' +
@@ -1088,19 +1088,19 @@
 
   function bossLine(city, ward, defeated) {
     if (!defeated) {
-      return '<p class="boss is-secret"><span class="sr-only">魔王尚未討伐</span>' +
-        '<span class="boss-k" aria-hidden="true">魔王</span>' + lockMedalHtml() +
+      return '<p class="boss is-secret"><span class="sr-only">大魔王櫃姐尚未攻略</span>' +
+        '<span class="boss-k" aria-hidden="true">大魔王櫃姐</span>' + lockMedalHtml() +
         '<b aria-hidden="true">' + HIDDEN_MARK + '</b></p>';
     }
-    var name = bossName(city, ward) || '這區的無名魔王';
-    return '<p class="boss is-down"><span class="sr-only">魔王已討伐</span><span class="boss-k">魔王</span><b>' +
+    var name = bossName(city, ward) || '這區的神秘櫃姐';
+    return '<p class="boss is-down"><span class="sr-only">大魔王櫃姐已攻略</span><span class="boss-k">大魔王櫃姐</span><b>' +
       esc(name) + '</b></p>';
   }
 
   function stageList(tier, cloudTier) {
     var html = [1, 2, 3].map(function (level) {
       var state = 'is-locked';
-      var word = '未討伐';
+      var word = '未攻略';
       if (level <= tier && level <= cloudTier) {
         state = 'is-cloud';
         word = '雲端認證';
@@ -1132,7 +1132,7 @@
     var cloudTier = tierCount(prog.cloudDone, prog.total);
     var href = '#/' + ward.city + '/' + ward.ward;
     var drop = view.earned
-      ? '<p class="drop"><span>掉落稱號</span>' + medalHtml(view.icon, 'ward', view.tier, true) + '<b>' + esc(view.name) + '</b></p>'
+      ? '<p class="drop"><span>獲得稱號</span>' + medalHtml(view.icon, 'ward', view.tier, true) + '<b>' + esc(view.name) + '</b></p>'
       : titleLine(view);
     return '<li><a class="ward dungeon" href="' + esc(href) + '"><div class="ward-top"><span class="date num">' +
       esc(ward.date) + '</span><span class="frac num"><b>' + prog.done + '</b><span> / ' + prog.total +
@@ -1141,7 +1141,7 @@
       bossLine(ward.city, ward.ward, tier >= 3) +
       drop +
       '<div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="' + prog.total +
-      '" aria-valuenow="' + prog.done + '" aria-label="' + esc(ward.city + ward.ward) + '副本，完成 ' + prog.done +
+      '" aria-valuenow="' + prog.done + '" aria-label="' + esc(ward.city + ward.ward) + '商圈，完成 ' + prog.done +
       '，雲端認證 ' + prog.cloudDone + '，待確認 ' + prog.pendingDone + '">' +
       splitBar(prog.done, prog.total, prog.cloudDone, prog.pendingDone) + '</div>' +
       splitCount(prog.cloudDone, prog.pendingDone) + '</a></li>';
@@ -1164,8 +1164,8 @@
     }).join('');
     if (!items) return '';
     return '<section class="chests-sec" aria-labelledby="chest-title">' +
-      '<div class="sec-h"><h2 id="chest-title">寶箱</h2><span>已打開 ' + open + ' / ' + score.achievements.length + '</span></div>' +
-      '<p class="wall-lead">寶箱關著的時候只看得到問號。自己勾選或雲端拍到都能打開，取消勾選又沒有雲端照片，箱子會重新關上。</p>' +
+      '<div class="sec-h"><h2 id="chest-title">禮物盒</h2><span>已打開 ' + open + ' / ' + score.achievements.length + '</span></div>' +
+      '<p class="wall-lead">禮物盒還沒拆的時候只看得到問號。自己勾選或雲端拍到都能拆開，取消勾選又沒有雲端照片，盒子會重新包好。</p>' +
       '<ul class="chests">' + items + '</ul></section>';
   }
 
@@ -1257,7 +1257,7 @@
   }
 
   function statNames() {
-    return model && model.loot && model.loot.stats.length ? model.loot.stats : ['攻擊', '魔力', '防禦', '敏捷', '幸運'];
+    return model && model.loot && model.loot.stats.length ? model.loot.stats : ['氣場', '魅力', '品味', '手速', '貴人運'];
   }
 
   function statLine(stats) {
@@ -1319,9 +1319,9 @@
   }
 
   function slotLabel(slot) {
-    if (slot === 'weapon') return '武器';
-    if (slot === 'magic') return '魔法';
-    return '防具';
+    if (slot === 'weapon') return '名牌包';
+    if (slot === 'magic') return '社交技';
+    return '珠寶行頭';
   }
 
   function gearSection() {
@@ -1350,11 +1350,11 @@
       var current = view.resolved[slot];
       var label = slotLabel(slot);
       if (!choices.length) {
-        picker = '<div class="gear-picker"><p class="gear-empty">這格還在等第一件' + label + '。先去完成景點吧。</p></div>';
+        picker = '<div class="gear-picker"><p class="gear-empty">這格還在等第一件' + label + '。先去逛景點吧。</p></div>';
       } else {
         var auto = current.manual
-          ? '<button type="button" class="gear-auto" data-gear-auto="' + slot + '">換回自動，穿最好的</button>'
-          : '<p class="gear-auto-note">現在自動穿著最好的一件。點下面可以改穿別的。</p>';
+          ? '<button type="button" class="gear-auto" data-gear-auto="' + slot + '">換回自動，戴最好的</button>'
+          : '<p class="gear-auto-note">現在自動戴著最好的一件。點下面可以換別的。</p>';
         var buttons = choices.map(function (item) {
           var on = current.item && current.item.id === item.id;
           return '<button type="button" class="gear-choice ' + rarityClass(item.rarity) + (on ? ' is-on' : '') +
@@ -1369,16 +1369,16 @@
     var equipped = statLine(view.equippedStats);
     var split = (equipped || pocket)
       ? '<p class="gear-split">' +
-        (equipped ? '<span>裝備 ' + equipped + '</span>' : '') +
-        (pocket ? '<span>口袋 ' + pocket + '</span>' : '') + '</p>'
+        (equipped ? '<span>穿戴 ' + equipped + '</span>' : '') +
+        (pocket ? '<span>包包裡 ' + pocket + '</span>' : '') + '</p>'
       : '';
     var any = false;
     statNames().forEach(function (name) { if (view.totals[name]) any = true; });
     var totalHtml = any
       ? statPills(view.totals) + split
-      : '<p class="gear-empty">能力合計還沒有加成，背包裡的風很大。</p>';
-    return '<div class="sheet-gear"><p class="kicker">裝備</p><div class="gear-slots">' + slots +
-      '</div>' + picker + '<p class="gear-total-k">能力合計</p>' + totalHtml + '</div>';
+      : '<p class="gear-empty">貴婦魅力還沒有加成，衣帽間空空的。</p>';
+    return '<div class="sheet-gear"><p class="kicker">穿搭</p><div class="gear-slots">' + slots +
+      '</div>' + picker + '<p class="gear-total-k">貴婦魅力合計</p>' + totalHtml + '</div>';
   }
 
   function codexHtml() {
@@ -1415,8 +1415,8 @@
       });
     }
     if (!summary.owned) {
-      return '<section class="codex" id="loot-codex" aria-labelledby="codex-title"><div class="sec-h"><h2 id="codex-title">戰利品圖鑑</h2><span class="num">已入手 0</span></div>' +
-        '<p class="gear-empty">背包還是空的。還沒有完成的景點，就不會掉東西，也不會打開寶箱。</p></section>';
+      return '<section class="codex" id="loot-codex" aria-labelledby="codex-title"><div class="sec-h"><h2 id="codex-title">精品收藏圖鑑</h2><span class="num">已入手 0</span></div>' +
+        '<p class="gear-empty">衣帽間還是空的。還沒有完成的景點，就不會收到精品，也不會拆禮物盒。</p></section>';
     }
     var cells = model.loot.items.filter(function (item) {
       return state.codex === 'all' || item.category === state.codex;
@@ -1432,7 +1432,7 @@
       var on = !!equipped[item.id];
       var inner = '<span class="loot-frame">' + lootIconHtml(item.icon) + '</span><span class="loot-name">' +
         esc(item.name) + '</span><span class="loot-meta">' + esc(item.rarityName) + '・' + esc(item.categoryName) +
-        (on ? '・裝備中' : '') + '</span>' +
+        (on ? '・穿戴中' : '') + '</span>' +
         (statLine(item.stats) ? '<span class="loot-stats">' + statLine(item.stats) + '</span>' : '') +
         (item.description ? '<span class="loot-desc">' + esc(item.description) + '</span>' : '');
       if (item.slot) {
@@ -1442,9 +1442,9 @@
       }
       return '<li><div class="loot-cell is-owned ' + rarityClass(item.rarity) + '">' + inner + '</div></li>';
     }).join('');
-    return '<section class="codex" id="loot-codex" aria-labelledby="codex-title"><div class="sec-h"><h2 id="codex-title">戰利品圖鑑</h2><span class="num">已入手 ' +
+    return '<section class="codex" id="loot-codex" aria-labelledby="codex-title"><div class="sec-h"><h2 id="codex-title">精品收藏圖鑑</h2><span class="num">已入手 ' +
       summary.owned + ' / ' + summary.total + '</span></div>' +
-      '<p class="wall-lead">景點每完成兩處或三處才掉一件。魔王討伐和寶箱開啟另外保證掉落，但都要先有完成的景點。同一進度在每台裝置算出來都一樣。還沒掉到的先鎖成剪影。武器、魔法、防具可以穿上；消耗品進口袋就直接加進能力。</p>' +
+      '<p class="wall-lead">景點每完成兩處或三處才入手一件。攻略大魔王櫃姐和拆禮物盒另外保證入手，但都要先有完成的景點。同一進度在每台裝置算出來都一樣。還沒入手的先鎖成剪影。名牌包、社交技、珠寶行頭可以穿戴；下午茶與小確幸收進包包就直接加進魅力。</p>' +
       '<ul class="rarity-counts">' + rarityBits + '</ul>' +
       '<div class="chips" role="toolbar" aria-label="圖鑑分類">' + chips + '</div>' +
       '<ul class="loot-grid">' + cells + '</ul></section>';
@@ -1456,13 +1456,13 @@
       var boss = bossName(drop.city, drop.ward);
       return drop.city + '・' + drop.ward + (boss ? '・' + boss : '');
     }
-    return drop.achievementName || '寶箱';
+    return drop.achievementName || '禮物盒';
   }
 
   function kindKicker(kind) {
-    if (kind === 'boss') return '魔王討伐';
-    if (kind === 'achievement') return '寶箱加碼';
-    return '景點掉落';
+    if (kind === 'boss') return '攻略大魔王櫃姐';
+    if (kind === 'achievement') return '禮物盒加碼';
+    return '逛街戰利品';
   }
 
   function dismissLoot() {
@@ -1483,7 +1483,7 @@
     var dup = count > 1 ? '<p class="loot-dup">圖鑑裡已經有一件，再收一次也不會壞。</p>' : '';
     var extra = drop.extra ? '<p class="loot-dup">另外 ' + drop.extra + ' 件也一併收進圖鑑了。</p>' : '';
     var pending = lootQueue.length - 1;
-    var button = pending > 0 ? '看下一件' : '收進圖鑑';
+    var button = pending > 0 ? '看下一件' : '收進衣帽間';
     var more = pending > 0 ? '<p class="loot-more">後面還有 ' + pending + ' 件</p>' : '';
     lootNode = document.createElement('div');
     lootNode.className = 'loot-reveal ' + rarityClass(item.rarity);
@@ -1603,15 +1603,15 @@
     var items = rows.map(dungeonCard).join('');
     document.getElementById('app').innerHTML =
       xpBarHtml(score) +
-      '<header class="mast"><p class="brand">物件景點・走跳 RPG</p><h1>景點拍照進度</h1></header>' +
+      '<header class="mast"><p class="brand">物件景點・貴婦養成</p><h1>景點拍照進度</h1></header>' +
       banner() +
       sheetHtml(score, equipped, unlocks.length, titleTotal) +
       '<div class="desk-split">' +
       progressCard('整體進度', done, total, true, { cloud: cloud, pending: pending }) +
-      noteBlock('請將照片上傳到 Google Drive 資料夾「物件景點／城市／區」，並使用建議檔名。同一景點最多三張，尾碼為 01、02、03。勾選會立刻加經驗，也算完成這個景點，畫面上寫待確認；雲端偵測到才亮綠燈，標成雲端認證。兩邊的經驗加在一起。取消勾選、又還沒被雲端拍到，稱號、魔王和寶箱會鎖回去。勾選只存在這台裝置。') +
+      noteBlock('請將照片上傳到 Google Drive 資料夾「物件景點／城市／區」，並使用建議檔名。同一景點最多三張，尾碼為 01、02、03。勾選會立刻加優雅值，也算完成這個景點，畫面上寫待確認；雲端偵測到才亮綠燈，標成雲端認證。兩邊的優雅值加在一起。取消勾選、又還沒被雲端拍到，稱號、大魔王櫃姐和禮物盒會鎖回去。勾選只存在這台裝置。') +
       '</div>' +
-      '<div class="sec-h"><h2>副本</h2><span>' + model.wards.length + ' 座</span></div>' +
-      '<p class="wall-lead">每個區是一座副本。三分之一收小怪，三分之二打精英，全部清完才看得到魔王的名字，並掉落該區稱號。景點每完成兩處或三處才掉一件戰利品，算過的結果每台裝置都一樣。</p>' +
+      '<div class="sec-h"><h2>貴婦商圈</h2><span>' + model.wards.length + ' 區</span></div>' +
+      '<p class="wall-lead">每個區是一個貴婦商圈。三分之一逛完週年慶，三分之二受邀 VIP 之夜，全部逛完才見得到大魔王櫃姐的真面目，並拿到該區稱號。景點每完成兩處或三處才入手一件精品，算過的結果每台裝置都一樣。</p>' +
       '<ol class="wards">' + items + '</ol>' +
       chestHtml(score) +
       codexHtml() +
@@ -1685,7 +1685,7 @@
           var sid = globalThis.SpotsLoot.sourceId('spot', [ward.city, ward.ward, spot.cat, spot.name]);
           var found = bag.bySource[sid];
           if (found) {
-            lootHtml = '<span class="spot-loot ' + rarityClass(found.item.rarity) + '">掉落 ' +
+            lootHtml = '<span class="spot-loot ' + rarityClass(found.item.rarity) + '">入手 ' +
               esc(found.item.name) + '</span>';
           }
         }
@@ -1748,7 +1748,7 @@
       (ward.spots.length || prog.synthetic
         ? progressCard(ward.ward + '進度', prog.done, prog.total, true, { cloud: prog.cloudDone, pending: prog.pendingDone })
         : '') +
-      noteBlock('請上傳到 Google Drive「' + esc(folder) + '」，並使用建議檔名。勾選立刻 +3 XP，也算這個景點完成，燈號會寫待確認。雲端拍到才是雲端認證。取消勾選、雲端又還沒有照片，這座副本的稱號會鎖回去。戰利品每完成兩處或三處才掉一件。取消後若雲端也沒有照片，那件掉落會鎖回去。') +
+      noteBlock('請上傳到 Google Drive「' + esc(folder) + '」，並使用建議檔名。勾選立刻 +3 優雅值，也算這個景點完成，燈號會寫待確認。雲端拍到才是雲端認證。取消勾選、雲端又還沒有照片，這個商圈的稱號會鎖回去。精品每完成兩處或三處才入手一件。取消後若雲端也沒有照片，那件精品會鎖回去。') +
       '</div>' +
       body;
   }
@@ -1807,7 +1807,7 @@
       id: 'class:' + role.name,
       className: 'scope-class',
       icon: '<span class="level-orb num">' + level + '</span>',
-      kicker: '職業升級',
+      kicker: '貴婦晉升',
       title: role.name,
       meta: 'Lv.' + level + (role.blurb ? ' · ' + role.blurb : '')
     });
@@ -1818,7 +1818,7 @@
       id: 'ach:' + item.id,
       className: 'scope-ach',
       icon: '<span class="chest-ico is-open">' + glyph(item.icon || 'chest') + '</span>',
-      kicker: '寶箱開啟',
+      kicker: '禮物盒拆開',
       title: item.name,
       meta: item.flavor || '成就解鎖'
     });

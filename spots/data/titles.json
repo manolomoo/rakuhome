@@ -1,243 +1,454 @@
 {
-  "tierLabels": ["達標 1/3", "達標 2/3", "全區完成"],
+  "tierLabels": [
+    "達標 1/3",
+    "達標 2/3",
+    "全區完成"
+  ],
   "wards": [
     {
       "city": "東京",
       "ward": "港區",
       "titles": [
-        {"name": "六本木迷路人", "icon": "pin"},
-        {"name": "港區打卡仔", "icon": "camera"},
-        {"name": "港區貴公子", "icon": "bowtie"}
+        {
+          "name": "六本木下午茶新手",
+          "icon": "pin"
+        },
+        {
+          "name": "港區名媛候補",
+          "icon": "camera"
+        },
+        {
+          "name": "港區頂級貴婦",
+          "icon": "bowtie"
+        }
       ]
     },
     {
       "city": "東京",
       "ward": "新宿區",
       "titles": [
-        {"name": "歌舞伎町誤闖者", "icon": "neon"},
-        {"name": "新宿南口不迷路", "icon": "compass"},
-        {"name": "新宿站出口全制霸", "icon": "train"}
+        {
+          "name": "伊勢丹迷路小姐",
+          "icon": "neon"
+        },
+        {
+          "name": "新宿百貨常客",
+          "icon": "compass"
+        },
+        {
+          "name": "新宿 VIP 卡持有人",
+          "icon": "train"
+        }
       ]
     },
     {
       "city": "京都",
       "ward": "中京區",
       "titles": [
-        {"name": "錦市場試吃王", "icon": "bowl"},
-        {"name": "先斗町夜遊仔", "icon": "lantern"},
-        {"name": "中京老字號代言人", "icon": "noren"}
+        {
+          "name": "錦市場優雅試吃",
+          "icon": "bowl"
+        },
+        {
+          "name": "先斗町夜宴佳賓",
+          "icon": "lantern"
+        },
+        {
+          "name": "中京老舖貴客",
+          "icon": "noren"
+        }
       ]
     },
     {
       "city": "京都",
       "ward": "下京區",
       "titles": [
-        {"name": "京都站出口失蹤", "icon": "exit"},
-        {"name": "京都塔仰到落枕", "icon": "tower"},
-        {"name": "東寺弘法市淘寶", "icon": "chest"}
+        {
+          "name": "京都站伴手禮選手",
+          "icon": "exit"
+        },
+        {
+          "name": "高島屋 VIP 會員",
+          "icon": "tower"
+        },
+        {
+          "name": "下京和服貴婦",
+          "icon": "chest"
+        }
       ]
     },
     {
       "city": "大阪",
       "ward": "北區",
       "titles": [
-        {"name": "梅田地下迷宮受害者", "icon": "maze"},
-        {"name": "梅田地下城解謎者", "icon": "key"},
-        {"name": "梅田地下迷宮通關者", "icon": "flag"}
+        {
+          "name": "梅田地下街迷路千金",
+          "icon": "maze"
+        },
+        {
+          "name": "阪急百貨熟客",
+          "icon": "key"
+        },
+        {
+          "name": "梅田名媛通關",
+          "icon": "flag"
+        }
       ]
     },
     {
       "city": "大阪",
       "ward": "中央區",
       "titles": [
-        {"name": "道頓堀跳河預備", "icon": "wave"},
-        {"name": "心齋橋爆買團長", "icon": "bag"},
-        {"name": "固力果跑者本人", "icon": "runner"}
+        {
+          "name": "道頓堀觀光小姐",
+          "icon": "wave"
+        },
+        {
+          "name": "心齋橋爆買貴婦",
+          "icon": "bag"
+        },
+        {
+          "name": "難波時尚女王",
+          "icon": "runner"
+        }
       ]
     },
     {
       "city": "福岡",
       "ward": "博多區",
       "titles": [
-        {"name": "屋台第一攤", "icon": "stall"},
-        {"name": "博多拉麵加麵達人", "icon": "ramen"},
-        {"name": "中洲夜之帝王", "icon": "moon"}
+        {
+          "name": "屋台初體驗淑女",
+          "icon": "stall"
+        },
+        {
+          "name": "博多料亭常客",
+          "icon": "ramen"
+        },
+        {
+          "name": "中洲夜宴女主人",
+          "icon": "moon"
+        }
       ]
     },
     {
       "city": "東京",
       "ward": "澀谷區",
       "titles": [
-        {"name": "十字路口被撞肩", "icon": "crossing"},
-        {"name": "109門口站崗", "icon": "building"},
-        {"name": "澀谷潮到出水", "icon": "sunglasses"}
+        {
+          "name": "澀谷潮流小姐",
+          "icon": "crossing"
+        },
+        {
+          "name": "表參道精品常客",
+          "icon": "building"
+        },
+        {
+          "name": "澀谷時尚貴婦",
+          "icon": "sunglasses"
+        }
       ]
     },
     {
       "city": "東京",
       "ward": "千代田區",
       "titles": [
-        {"name": "丸之內走錯大樓", "icon": "towers"},
-        {"name": "二重橋拍照狂", "icon": "bridge"},
-        {"name": "秋葉原紙袋王", "icon": "bags"}
+        {
+          "name": "丸之內上班族淑女",
+          "icon": "towers"
+        },
+        {
+          "name": "帝國飯店下午茶",
+          "icon": "bridge"
+        },
+        {
+          "name": "千代田皇室級貴婦",
+          "icon": "bags"
+        }
       ]
     },
     {
       "city": "東京",
       "ward": "中央區",
       "titles": [
-        {"name": "銀座不敢過馬路", "icon": "signal"},
-        {"name": "築地玉子燒試吃", "icon": "egg"},
-        {"name": "歌舞伎座站到腳麻", "icon": "mask"}
+        {
+          "name": "銀座櫥窗巡禮",
+          "icon": "signal"
+        },
+        {
+          "name": "銀座三越熟客",
+          "icon": "egg"
+        },
+        {
+          "name": "銀座頂級貴婦",
+          "icon": "mask"
+        }
       ]
     },
     {
       "city": "京都",
       "ward": "東山區",
       "titles": [
-        {"name": "清水寺爬坡喘", "icon": "stairs"},
-        {"name": "八坂神社常客", "icon": "torii"},
-        {"name": "祇園舞妓的攝影師", "icon": "fan"}
+        {
+          "name": "清水坂和服少女",
+          "icon": "stairs"
+        },
+        {
+          "name": "八坂神社祈福千金",
+          "icon": "torii"
+        },
+        {
+          "name": "祇園茶屋貴客",
+          "icon": "fan"
+        }
       ]
     },
     {
       "city": "福岡",
       "ward": "中央區",
       "titles": [
-        {"name": "天神地下街打轉", "icon": "spiral"},
-        {"name": "大濠公園看天鵝", "icon": "swan"},
-        {"name": "大名精品袋扛爆", "icon": "purse"}
+        {
+          "name": "天神地下街購物小姐",
+          "icon": "spiral"
+        },
+        {
+          "name": "大濠公園優雅散步",
+          "icon": "swan"
+        },
+        {
+          "name": "大名精品袋扛爆貴婦",
+          "icon": "purse"
+        }
       ]
     },
     {
       "city": "大阪",
       "ward": "西區",
       "titles": [
-        {"name": "堀江選店選到關", "icon": "shop"},
-        {"name": "京瓷巨蛋應援團", "icon": "megaphone"},
-        {"name": "韌公園野餐霸主", "icon": "basket"}
+        {
+          "name": "堀江選物小資女",
+          "icon": "shop"
+        },
+        {
+          "name": "南堀江咖啡名媛",
+          "icon": "megaphone"
+        },
+        {
+          "name": "堀江選物店 VIP",
+          "icon": "basket"
+        }
       ]
     },
     {
       "city": "東京",
       "ward": "品川區",
       "titles": [
-        {"name": "五反田轉到暈", "icon": "dizzy"},
-        {"name": "戶越銀座吃撐了", "icon": "onigiri"},
-        {"name": "天王洲夜景收藏家", "icon": "skyline"}
+        {
+          "name": "五反田小資女",
+          "icon": "dizzy"
+        },
+        {
+          "name": "戶越銀座美食家",
+          "icon": "onigiri"
+        },
+        {
+          "name": "天王洲夜景貴婦",
+          "icon": "skyline"
+        }
       ]
     },
     {
       "city": "東京",
       "ward": "文京區",
       "titles": [
-        {"name": "東大赤門路人甲", "icon": "gate"},
-        {"name": "小石川後樂園坐整天", "icon": "bench"},
-        {"name": "東京巨蛋應援常駐", "icon": "baseball"}
+        {
+          "name": "文京區氣質千金",
+          "icon": "gate"
+        },
+        {
+          "name": "後樂園賞花淑女",
+          "icon": "bench"
+        },
+        {
+          "name": "文京名門夫人",
+          "icon": "baseball"
+        }
       ]
     },
     {
       "city": "東京",
       "ward": "台東區",
       "titles": [
-        {"name": "雷門底下被擠扁", "icon": "kaminari"},
-        {"name": "阿美橫砍價學徒", "icon": "tag"},
-        {"name": "合羽橋模型收藏家", "icon": "knife"}
+        {
+          "name": "淺草和服體驗",
+          "icon": "kaminari"
+        },
+        {
+          "name": "阿美橫殺價貴婦",
+          "icon": "tag"
+        },
+        {
+          "name": "上野美術館贊助人",
+          "icon": "knife"
+        }
       ]
     },
     {
       "city": "京都",
       "ward": "左京區",
       "titles": [
-        {"name": "哲學之道沒走哲", "icon": "path"},
-        {"name": "銀閣寺找不到銀", "icon": "pavilion"},
-        {"name": "下鴨納涼床常駐", "icon": "riverbed"}
+        {
+          "name": "哲學之道散步淑女",
+          "icon": "path"
+        },
+        {
+          "name": "南禪寺茶會佳賓",
+          "icon": "pavilion"
+        },
+        {
+          "name": "下鴨納涼床貴婦",
+          "icon": "riverbed"
+        }
       ]
     },
     {
       "city": "大阪",
       "ward": "天王寺區",
       "titles": [
-        {"name": "四天王寺數燈籠", "icon": "lanterns"},
-        {"name": "天王寺河馬粉絲", "icon": "hippo"},
-        {"name": "夕陽丘喝到打烊", "icon": "glass"}
+        {
+          "name": "四天王寺祈福小姐",
+          "icon": "lanterns"
+        },
+        {
+          "name": "HARUKAS 景觀貴賓",
+          "icon": "hippo"
+        },
+        {
+          "name": "夕陽丘優雅晚餐",
+          "icon": "glass"
+        }
       ]
     },
     {
       "city": "東京",
       "ward": "目黑區",
       "titles": [
-        {"name": "中目黑櫻花路人", "icon": "sakura"},
-        {"name": "自由之丘拿鐵成癮", "icon": "coffee"},
-        {"name": "目黑川閃車達人", "icon": "car"}
+        {
+          "name": "中目黑賞櫻小姐",
+          "icon": "sakura"
+        },
+        {
+          "name": "自由之丘甜點名媛",
+          "icon": "coffee"
+        },
+        {
+          "name": "目黑川河畔貴婦",
+          "icon": "car"
+        }
       ]
     },
     {
       "city": "東京",
       "ward": "豐島區",
       "titles": [
-        {"name": "池袋分不清出口", "icon": "signpost"},
-        {"name": "太陽城看到腿軟", "icon": "sun"},
-        {"name": "巢鴨紅內褲代言", "icon": "shorts"}
+        {
+          "name": "池袋迷路小姐",
+          "icon": "signpost"
+        },
+        {
+          "name": "太陽城購物名媛",
+          "icon": "sun"
+        },
+        {
+          "name": "池袋百貨 VIP 貴婦",
+          "icon": "shorts"
+        }
       ]
     },
     {
       "city": "京都",
       "ward": "上京區",
       "titles": [
-        {"name": "御所石牆走不完", "icon": "wall"},
-        {"name": "北野天滿宮繪馬狂", "icon": "ema"},
-        {"name": "西陣織猛點頭", "icon": "weave"}
+        {
+          "name": "御所散步千金",
+          "icon": "wall"
+        },
+        {
+          "name": "北野天滿宮祈福名媛",
+          "icon": "ema"
+        },
+        {
+          "name": "西陣織訂製貴婦",
+          "icon": "weave"
+        }
       ]
     },
     {
       "city": "大阪",
       "ward": "浪速區",
       "titles": [
-        {"name": "通天閣看到落枕", "icon": "tsuten"},
-        {"name": "新世界炸串加碼", "icon": "skewer"},
-        {"name": "日本橋挖寶王", "icon": "gem"}
+        {
+          "name": "通天閣觀光小姐",
+          "icon": "tsuten"
+        },
+        {
+          "name": "新世界串炸名媛",
+          "icon": "skewer"
+        },
+        {
+          "name": "日本橋挖寶貴婦",
+          "icon": "gem"
+        }
       ]
     },
     {
       "city": "大阪",
       "ward": "福島區",
       "titles": [
-        {"name": "福島一出站就餓", "icon": "steam"},
-        {"name": "螢橋居酒屋巡航", "icon": "beer"},
-        {"name": "福島美食雷達王", "icon": "radar"}
+        {
+          "name": "福島美食小資女",
+          "icon": "steam"
+        },
+        {
+          "name": "福島居酒屋名媛",
+          "icon": "beer"
+        },
+        {
+          "name": "福島美食預約女王",
+          "icon": "radar"
+        }
       ]
     }
   ],
   "cities": [
     {
       "city": "東京",
-      "kicker": "制霸東京",
-      "title": "東京都知事（非官方）",
+      "kicker": "征服東京貴婦圈",
+      "title": "東京頂級貴婦（非官方）",
       "icon": "capitol"
     },
     {
       "city": "京都",
-      "kicker": "制霸京都",
-      "title": "京都千年地縛靈",
+      "kicker": "征服京都貴婦圈",
+      "title": "京都千年名門夫人",
       "icon": "ghost"
     },
     {
       "city": "大阪",
-      "kicker": "制霸大阪",
-      "title": "大阪大媽認證的人",
+      "kicker": "征服大阪貴婦圈",
+      "title": "大阪貴婦圈認證",
       "icon": "seal"
     },
     {
       "city": "福岡",
-      "kicker": "制霸福岡",
-      "title": "福岡明太子親善大使",
+      "kicker": "征服福岡貴婦圈",
+      "title": "福岡名媛親善大使",
       "icon": "roe"
     }
   ],
   "grand": {
     "kicker": "23 區全完成",
-    "title": "小僧帶路御用攝影師・日本不動產走跳王",
+    "title": "小僧帶路御用貴婦・日本不動產頂級名媛",
     "icon": "lens"
   }
 }

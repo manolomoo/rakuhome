@@ -3,7 +3,11 @@
     "perTick": 3,
     "firstPhoto": 10,
     "extraPhoto": 5,
-    "wardTier": [15, 30, 60],
+    "wardTier": [
+      15,
+      30,
+      60
+    ],
     "city": 80,
     "grand": 200
   },
@@ -12,129 +16,298 @@
     "base": 36
   },
   "classes": [
-    { "level": 1, "name": "見習攝影師", "blurb": "快門還在找對焦，背包裡只有空氣。" },
-    { "level": 4, "name": "街景獵人", "blurb": "巷口的光你都想收進記憶卡。" },
-    { "level": 8, "name": "地圖繪師", "blurb": "走錯路也算田野調查，地圖會原諒你。" },
-    { "level": 12, "name": "副本跑者", "blurb": "小怪見了你，會先讓出拍點。" },
-    { "level": 16, "name": "區域討伐隊", "blurb": "精英怪開始互相傳你的檔名。" },
-    { "level": 21, "name": "城市巡遊使", "blurb": "市長還沒簽名，你先在觀景台蓋章。" },
-    { "level": 26, "name": "雲端認證大師", "blurb": "燈號一綠，傳說就自己寫好了。" },
-    { "level": 31, "name": "傳說走跳王", "blurb": "不動產看到你，會自己開門鞠躬。" }
+    {
+      "level": 1,
+      "name": "小資女",
+      "blurb": "錢包還在減肥，但品味已經先出門了。"
+    },
+    {
+      "level": 4,
+      "name": "精品逛街族",
+      "blurb": "櫃姐開始記得你的名字。"
+    },
+    {
+      "level": 8,
+      "name": "下午茶達人",
+      "blurb": "哪家甜點塔最高，你閉著眼都知道。"
+    },
+    {
+      "level": 12,
+      "name": "輕熟名媛",
+      "blurb": "派對邀請函開始塞爆信箱。"
+    },
+    {
+      "level": 16,
+      "name": "社交名媛",
+      "blurb": "你一出場，大家就知道今晚會很精彩。"
+    },
+    {
+      "level": 21,
+      "name": "貴婦",
+      "blurb": "購物不看標價，只看心情。"
+    },
+    {
+      "level": 26,
+      "name": "頂級貴婦",
+      "blurb": "百貨公司為你提早開門。"
+    },
+    {
+      "level": 31,
+      "name": "傳說貴婦天后",
+      "blurb": "豪宅看到你，會自己開門鞠躬。"
+    }
   ],
   "stages": [
-    { "tier": 1, "name": "小怪" },
-    { "tier": 2, "name": "精英怪" },
-    { "tier": 3, "name": "魔王" }
+    {
+      "tier": 1,
+      "name": "週年慶"
+    },
+    {
+      "tier": 2,
+      "name": "VIP 之夜"
+    },
+    {
+      "tier": 3,
+      "name": "大魔王櫃姐"
+    }
   ],
   "bosses": [
-    { "city": "東京", "ward": "港區", "name": "六本木迷路魔・塔影伯爵" },
-    { "city": "東京", "ward": "新宿區", "name": "無限出口哥吉拉" },
-    { "city": "京都", "ward": "中京區", "name": "錦市場試吃妖怪" },
-    { "city": "京都", "ward": "下京區", "name": "京都塔落枕巨人" },
-    { "city": "大阪", "ward": "北區", "name": "梅田地下迷宮龍" },
-    { "city": "大阪", "ward": "中央區", "name": "固力果暴走跑者" },
-    { "city": "福岡", "ward": "博多區", "name": "中洲屋台夜王" },
-    { "city": "東京", "ward": "澀谷區", "name": "十字路口撞肩巨人" },
-    { "city": "東京", "ward": "千代田區", "name": "紙袋暴君秋葉原" },
-    { "city": "東京", "ward": "中央區", "name": "銀座不敢過馬路魔" },
-    { "city": "京都", "ward": "東山區", "name": "清水坂喘魔" },
-    { "city": "福岡", "ward": "中央區", "name": "天神地下街回轉獸" },
-    { "city": "大阪", "ward": "西區", "name": "堀江閉店選店魔" },
-    { "city": "東京", "ward": "品川區", "name": "五反田迴轉頭暈怪" },
-    { "city": "東京", "ward": "文京區", "name": "赤門路人甲首領" },
-    { "city": "東京", "ward": "台東區", "name": "雷門擠扁大佛" },
-    { "city": "京都", "ward": "左京區", "name": "找不到銀的銀閣靈" },
-    { "city": "大阪", "ward": "天王寺區", "name": "河馬燈籠守護者" },
-    { "city": "東京", "ward": "目黑區", "name": "櫻花閃車魔" },
-    { "city": "東京", "ward": "豐島區", "name": "巢鴨紅內褲長老" },
-    { "city": "京都", "ward": "上京區", "name": "走不完的御所石牆" },
-    { "city": "大阪", "ward": "浪速區", "name": "通天閣落枕塔靈" },
-    { "city": "大阪", "ward": "福島區", "name": "出站就餓雷達" }
+    {
+      "city": "東京",
+      "ward": "港區",
+      "name": "六本木之丘時尚女王"
+    },
+    {
+      "city": "東京",
+      "ward": "新宿區",
+      "name": "伊勢丹週年慶人潮"
+    },
+    {
+      "city": "京都",
+      "ward": "中京區",
+      "name": "錦市場試吃女王"
+    },
+    {
+      "city": "京都",
+      "ward": "下京區",
+      "name": "京都車站伴手禮魔王"
+    },
+    {
+      "city": "大阪",
+      "ward": "北區",
+      "name": "梅田阪急 VIP 櫃姐"
+    },
+    {
+      "city": "大阪",
+      "ward": "中央區",
+      "name": "心齋橋限量款秒殺魔"
+    },
+    {
+      "city": "福岡",
+      "ward": "博多區",
+      "name": "中洲高級料亭老闆娘"
+    },
+    {
+      "city": "東京",
+      "ward": "澀谷區",
+      "name": "澀谷 109 潮流總監"
+    },
+    {
+      "city": "東京",
+      "ward": "千代田區",
+      "name": "丸之內精品店長"
+    },
+    {
+      "city": "東京",
+      "ward": "中央區",
+      "name": "銀座和光櫥窗女王"
+    },
+    {
+      "city": "京都",
+      "ward": "東山區",
+      "name": "祇園茶屋大姐頭"
+    },
+    {
+      "city": "福岡",
+      "ward": "中央區",
+      "name": "天神百貨週年慶戰神"
+    },
+    {
+      "city": "大阪",
+      "ward": "西區",
+      "name": "堀江選物店主理人"
+    },
+    {
+      "city": "東京",
+      "ward": "品川區",
+      "name": "高輪飯店宴會經理"
+    },
+    {
+      "city": "東京",
+      "ward": "文京區",
+      "name": "文京區名校家長會長"
+    },
+    {
+      "city": "東京",
+      "ward": "台東區",
+      "name": "阿美橫砍價大嬸"
+    },
+    {
+      "city": "京都",
+      "ward": "左京區",
+      "name": "哲學之道茶會宗師"
+    },
+    {
+      "city": "大阪",
+      "ward": "天王寺區",
+      "name": "阿倍野 HARUKAS 貴賓室管家"
+    },
+    {
+      "city": "東京",
+      "ward": "目黑區",
+      "name": "中目黑咖啡廳排隊魔王"
+    },
+    {
+      "city": "東京",
+      "ward": "豐島區",
+      "name": "池袋西武化妝品專櫃長"
+    },
+    {
+      "city": "京都",
+      "ward": "上京區",
+      "name": "西陣織老舖女將"
+    },
+    {
+      "city": "大阪",
+      "ward": "浪速區",
+      "name": "新世界炸串老闆娘"
+    },
+    {
+      "city": "大阪",
+      "ward": "福島區",
+      "name": "福島美食預約魔王"
+    }
   ],
   "achievements": [
     {
       "id": "first-shot",
-      "name": "第一次快門",
-      "flavor": "有了第一個景點，背包終於不是擺設。",
+      "name": "第一次逛街",
+      "flavor": "第一個景點入袋，貴婦之路正式開張。",
       "icon": "camera",
-      "rule": { "type": "spots", "min": 1 }
+      "rule": {
+        "type": "spots",
+        "min": 1
+      }
     },
     {
       "id": "cloud-first",
-      "name": "雲端初認證",
-      "flavor": "綠燈亮起的聲音，比快門還好聽。",
+      "name": "雲端驗貨成功",
+      "flavor": "綠燈一亮，比收到專櫃簡訊還開心。",
       "icon": "lens",
-      "rule": { "type": "cloudSpots", "min": 1 }
+      "rule": {
+        "type": "cloudSpots",
+        "min": 1
+      }
     },
     {
       "id": "ten-burst",
-      "name": "十連拍不眨眼",
-      "flavor": "十個景點到手，腳才開始抗議。",
+      "name": "十家店掃貨中",
+      "flavor": "十個景點到手，高跟鞋開始抗議。",
       "icon": "spark",
-      "rule": { "type": "spots", "min": 10 }
+      "rule": {
+        "type": "spots",
+        "min": 10
+      }
     },
     {
       "id": "day-twenty",
-      "name": "一日走跳二十連",
-      "flavor": "同一天收掉二十個景點，日程表看了會頭暈。",
+      "name": "一日逛街二十攤",
+      "flavor": "同一天收掉二十個景點，司機都喊累。",
       "icon": "sun",
-      "rule": { "type": "daily", "min": 20 }
+      "rule": {
+        "type": "daily",
+        "min": 20
+      }
     },
     {
       "id": "category-clear",
-      "name": "分類清道夫",
-      "flavor": "一整類景點掃光，清單終於能呼吸。",
+      "name": "整排專櫃包下來",
+      "flavor": "一整類景點掃光，櫃姐鼓掌送你出門。",
       "icon": "broom",
-      "rule": { "type": "category", "minSize": 3 }
+      "rule": {
+        "type": "category",
+        "minSize": 3
+      }
     },
     {
       "id": "triple-ten",
-      "name": "三張全收的人",
-      "flavor": "十個景點都湊滿三張，記憶卡在鼓掌。",
+      "name": "三色都要",
+      "flavor": "十個景點都湊滿三張，貴婦從不只買一色。",
       "icon": "bags",
-      "rule": { "type": "triples", "min": 10 }
+      "rule": {
+        "type": "triples",
+        "min": 10
+      }
     },
     {
       "id": "first-boss",
-      "name": "初陣討伐魔王",
-      "flavor": "第一次把整座副本清完，掉落稱號還熱的。",
+      "name": "首次 VIP 封館",
+      "flavor": "第一次把整區逛完，大魔王櫃姐親自送行。",
       "icon": "flag",
-      "rule": { "type": "bosses", "min": 1 }
+      "rule": {
+        "type": "bosses",
+        "min": 1
+      }
     },
     {
       "id": "extra-hoard",
-      "name": "加碼照片收藏家",
-      "flavor": "第一張不夠，你連第二張第三張都不放過。",
+      "name": "加購停不下來",
+      "flavor": "第一張不夠，第二張第三張也要收。",
       "icon": "chest",
-      "rule": { "type": "extras", "min": 40 }
+      "rule": {
+        "type": "extras",
+        "min": 40
+      }
     },
     {
       "id": "five-bosses",
-      "name": "魔王收集癖",
-      "flavor": "五座副本的魔王都倒下，行程表開始怕你。",
+      "name": "五館 VIP 常客",
+      "flavor": "五個區的大魔王櫃姐都記住你了。",
       "icon": "crown",
-      "rule": { "type": "bosses", "min": 5 }
+      "rule": {
+        "type": "bosses",
+        "min": 5
+      }
     },
     {
       "id": "all-wards",
-      "name": "每個副本都踩點",
-      "flavor": "二十三座副本全都留下鞋印。",
+      "name": "每區都刷過卡",
+      "flavor": "二十三個區都留下優雅的鞋印。",
       "icon": "compass",
-      "rule": { "type": "wardsTouched", "all": true }
+      "rule": {
+        "type": "wardsTouched",
+        "all": true
+      }
     },
     {
       "id": "four-cities",
-      "name": "四城制霸",
-      "flavor": "東京、京都、大阪、福岡，全都蓋過章。",
+      "name": "四城名媛",
+      "flavor": "東京、京都、大阪、福岡，貴婦圈都認識你。",
       "icon": "capitol",
-      "rule": { "type": "cities", "min": 4 }
+      "rule": {
+        "type": "cities",
+        "min": 4
+      }
     },
     {
       "id": "day-marathon",
-      "name": "走跳不會停",
-      "flavor": "同一天兩百個景點。這已經不是行程，是傳說。",
+      "name": "貴婦不會累",
+      "flavor": "同一天兩百個景點。這已經不是逛街，是傳說。",
       "icon": "runner",
-      "rule": { "type": "daily", "min": 200 }
+      "rule": {
+        "type": "daily",
+        "min": 200
+      }
     }
   ]
 }

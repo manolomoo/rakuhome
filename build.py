@@ -134,7 +134,7 @@ cr='''<section class="sec" style="padding-top:140px"><div class="wrap"><div clas
 <tr><th>p_*.jpg</th><td>物件写真：楽房ホーム旧サイト（mookyoto.wixsite.com/rakuhome）掲載画像</td></tr></table></div></section>'''
 page('credits.html','画像クレジット',cr)
 # zh top
-zh=f'''<section class="fv"><div class="fv-img" style="background-image:url(../img/hero_blue.jpg)"></div><div class="fv-tx"><p class="en">TAICHUNG RENTAL SERVICE</p><h1>讓您在台中，也能找到<br><em>「家」</em>的感覺</h1><a class="btn" href="../contact.html">聯絡我們</a></div></section>
+zh=f'''<section class="fv"><div class="fv-img"></div><div class="fv-tx"><p class="en">TAICHUNG RENTAL SERVICE</p><h1>讓您在台中，也能找到<br><em>「家」</em>的感覺</h1><a class="btn" href="../contact.html">聯絡我們</a></div></section>
 <section class="sec"><div class="wrap concept"><div class="rv"><div class="ttl l"><span class="en">ABOUT</span><h2>公司概要</h2></div></div><div class="rv">
 <p>本公司位於台中七期市政路上，專營台日不動產相關業務。我們的目的，是協助台灣房東與日本租客把關，一起跨越語言隔閡，順利完成契約。</p>
 <p>樂房不動產擁有熟悉日本相關資訊的專業團隊，成交件數已超過 1,000 件。</p>

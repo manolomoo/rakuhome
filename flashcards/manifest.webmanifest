@@ -1,0 +1,20 @@
+{
+  "name": "字旅手帳 - 外語單字複習筆記",
+  "short_name": "字旅手帳",
+  "description": "以艾賓浩斯間隔複習法背誦外語單字的純靜態網站，支援西文／英文／日文入門詞庫。",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f4ecd8",
+  "theme_color": "#f4ecd8",
+  "lang": "zh-Hant",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

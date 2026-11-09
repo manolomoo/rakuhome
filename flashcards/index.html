@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>字旅手帳｜外語單字複習筆記</title>
+<meta name="description" content="字旅手帳：用艾賓浩斯間隔複習法背外語單字的純靜態網站，支援西文／英文／日文入門詞庫。">
+<meta name="theme-color" content="#f4ecd8">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='%23f4ecd8' stroke='%23a63d2f' stroke-width='5'/%3E%3Ctext x='50' y='64' font-size='40' text-anchor='middle' fill='%23a63d2f' font-family='serif'%3E字%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700;900&family=Noto+Sans+TC:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ===================== 頁首：護照封面風格 ===================== -->
+  <header class="app-header">
+    <div class="stamp-mark" aria-hidden="true">
+      <span class="stamp-mark__ring"></span>
+      <span class="stamp-mark__char">字旅</span>
+    </div>
+    <div class="app-header__text">
+      <h1 class="app-title">字旅手帳</h1>
+      <p class="app-subtitle">隨身的語言旅行筆記・間隔複習</p>
+    </div>
+    <button id="btn-toggle-theme" class="icon-btn icon-btn--ghost" type="button" aria-label="切換深淺色主題">
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9c0-.3 0-.6-.05-.9A7 7 0 0 1 12 3Z" fill="currentColor"/></svg>
+    </button>
+  </header>
+
+  <!-- ===================== 主要內容 ===================== -->
+  <main class="app-main" id="app-main">
+
+    <!-- ---------- 首頁儀表板 ---------- -->
+    <section id="view-home" class="view" data-view="home">
+      <div class="ticket-card ticket-card--hero">
+        <p class="ticket-card__label">今日行程</p>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <span class="hero-stat__value" id="stat-due">0</span>
+            <span class="hero-stat__label">今日到期</span>
+          </div>
+          <div class="hero-stat">
+            <span class="hero-stat__value" id="stat-streak">0</span>
+            <span class="hero-stat__label">連續天數</span>
+          </div>
+          <div class="hero-stat">
+            <span class="hero-stat__value" id="stat-mastered">0</span>
+            <span class="hero-stat__label">已記熟</span>
+          </div>
+        </div>
+        <div class="level-row">
+          <div class="level-ring" aria-hidden="true"><span id="stat-level">Lv.1</span></div>
+          <div class="xp-bar" role="img" aria-label="經驗值進度">
+            <div class="xp-bar__fill" id="xp-bar-fill"></div>
+          </div>
+          <span class="xp-text" id="xp-text">0 XP</span>
+        </div>
+        <label class="field field--inline">
+          <span class="field__label">詞庫篩選</span>
+          <select id="home-filter" aria-label="選擇要複習的詞庫"></select>
+        </label>
+        <button id="btn-start-review" class="btn btn--primary btn--block" type="button">開始複習</button>
+      </div>
+
+      <div class="badge-strip" id="badge-strip" aria-label="已解鎖成就"></div>
+
+      <div class="quick-links">
+        <button id="link-mistakes-home" class="ticket-card ticket-card--link" type="button" data-navto="mistakes">
+          <span class="ticket-card__label">錯題本</span>
+          <span class="quick-links__count" id="mistakes-count-home">0</span>
+          <span class="quick-links__hint">再練一次尚未答對的題目</span>
+        </button>
+        <button id="link-add-home" class="ticket-card ticket-card--link" type="button" data-navto="add">
+          <span class="ticket-card__label">新增單字</span>
+          <span class="quick-links__hint">匯入詞庫或手動建立卡片</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ---------- 翻卡複習 ---------- -->
+    <section id="view-review" class="view" data-view="review" hidden>
+      <div class="view-topbar">
+        <h2 class="view-title">翻卡複習</h2>
+        <span class="view-progress" id="review-progress">0 / 0</span>
+      </div>
+
+      <div id="review-empty" class="empty-state" hidden>
+        <p class="empty-state__title">今天沒有待複習的卡片</p>
+        <p class="empty-state__hint">太棒了！可以去「驗收模式」練習，或新增更多單字。</p>
+        <button class="btn btn--secondary" data-navto="home" type="button">回首頁</button>
+      </div>
+
+      <div id="review-stage" class="review-stage">
+        <div class="flip-perspective">
+          <div class="flip-card" id="review-card" role="button" tabindex="0" aria-label="點擊或按空白鍵翻面">
+            <div class="flip-card__face flip-card__face--front">
+              <span class="lang-tag" id="review-front-lang">ES</span>
+              <p class="flip-card__term" id="review-front-term">—</p>
+              <p class="flip-card__reading" id="review-front-reading"></p>
+              <button class="icon-btn icon-btn--sound" id="review-pronounce" type="button" aria-label="播放發音">
+                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M3 10v4h4l5 5V5L7 10H3Zm13.5 2a4.5 4.5 0 0 0-2.5-4.03v8.06A4.5 4.5 0 0 0 16.5 12Z" fill="currentColor"/></svg>
+              </button>
+              <span class="flip-card__hint">點卡片或按空白鍵看答案</span>
+            </div>
+            <div class="flip-card__face flip-card__face--back">
+              <p class="flip-card__meaning" id="review-back-meaning">—</p>
+              <p class="flip-card__example" id="review-back-example"></p>
+              <span class="flip-card__hint">覺得自己記得嗎？</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="grade-row" id="review-grade-row" hidden>
+          <button class="btn btn--forget" id="review-btn-forget" type="button">不熟（←）</button>
+          <button class="btn btn--remember" id="review-btn-remember" type="button">記得（→）</button>
+        </div>
+        <button class="btn btn--outline btn--block" id="review-flip-btn" type="button">翻面（空白鍵）</button>
+      </div>
+
+      <div id="review-summary" class="overlay-card" hidden>
+        <p class="overlay-card__title">本輪複習完成！</p>
+        <p class="overlay-card__body">記得 <strong id="review-summary-remember">0</strong> 張・不熟 <strong id="review-summary-forget">0</strong> 張・獲得 <strong id="review-summary-xp">0</strong> XP</p>
+        <div class="overlay-card__actions">
+          <button class="btn btn--secondary" data-navto="home" type="button">回首頁</button>
+          <button class="btn btn--primary" data-navto="quiz" type="button">前往驗收</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- 驗收模式 ---------- -->
+    <section id="view-quiz" class="view" data-view="quiz" hidden>
+      <div class="view-topbar">
+        <h2 class="view-title">驗收模式</h2>
+        <span class="view-progress" id="quiz-progress">0 / 0</span>
+      </div>
+
+      <div class="tab-row" id="quiz-tabs" role="tablist" aria-label="驗收模式選擇">
+        <button class="tab-btn is-active" data-mode="choice" type="button" role="tab" aria-selected="true">選擇題</button>
+        <button class="tab-btn" data-mode="spelling" type="button" role="tab" aria-selected="false">拼字</button>
+        <button class="tab-btn" data-mode="listen" type="button" role="tab" aria-selected="false">聽音選字</button>
+      </div>
+
+      <div class="quiz-controls">
+        <label class="field field--inline">
+          <span class="field__label">詞庫</span>
+          <select id="quiz-filter" aria-label="選擇驗收詞庫"></select>
+        </label>
+        <label class="field field--inline" id="quiz-direction-field">
+          <span class="field__label">方向</span>
+          <select id="quiz-direction" aria-label="選擇題方向">
+            <option value="fl2cn">外語 → 中文</option>
+            <option value="cn2fl">中文 → 外語</option>
+          </select>
+        </label>
+      </div>
+
+      <div id="quiz-empty" class="empty-state" hidden>
+        <p class="empty-state__title">這個詞庫的卡片不夠出題</p>
+        <p class="empty-state__hint">選擇題至少需要 4 張卡片，請先匯入詞庫或新增單字。</p>
+        <button class="btn btn--secondary" data-navto="add" type="button">前往新增單字</button>
+      </div>
+
+      <div id="quiz-stage" class="quiz-stage">
+        <div class="ticket-card quiz-prompt-card">
+          <span class="lang-tag" id="quiz-lang-tag">ES</span>
+          <p class="quiz-prompt" id="quiz-prompt">—</p>
+          <p class="quiz-prompt__reading" id="quiz-prompt-reading"></p>
+
+          <!-- 選擇題 / 聽音選字 共用的選項容器 -->
+          <div class="quiz-options" id="quiz-options" role="group" aria-label="選項"></div>
+
+          <!-- 聽音選字：播放鍵 + 無語音降級提示 -->
+          <div id="quiz-listen-controls" class="listen-controls" hidden>
+            <button class="btn btn--outline" id="quiz-listen-play" type="button">🔊 播放發音</button>
+            <p class="listen-fallback" id="quiz-listen-fallback" hidden>此裝置不支援語音合成，已改為直接顯示外語詞。</p>
+          </div>
+
+          <!-- 拼字 -->
+          <div id="quiz-spell-controls" class="spell-controls" hidden>
+            <input type="text" id="quiz-spell-input" class="text-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="輸入外語拼字" aria-label="輸入外語拼字答案">
+            <button class="btn btn--primary" id="quiz-spell-submit" type="button">送出</button>
+            <p class="spell-feedback" id="quiz-spell-feedback"></p>
+          </div>
+        </div>
+        <p class="quiz-score">本輪答對 <span id="quiz-score">0</span> 題</p>
+      </div>
+
+      <div id="quiz-summary" class="overlay-card" hidden>
+        <p class="overlay-card__title">驗收完成！</p>
+        <p class="overlay-card__body">答對 <strong id="quiz-summary-correct">0</strong> / <strong id="quiz-summary-total">0</strong> 題，獲得 <strong id="quiz-summary-xp">0</strong> XP</p>
+        <div class="overlay-card__actions">
+          <button class="btn btn--secondary" data-navto="home" type="button">回首頁</button>
+          <button class="btn btn--primary" id="quiz-summary-retry" type="button">再來一輪</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- 卡片庫 ---------- -->
+    <section id="view-library" class="view" data-view="library" hidden>
+      <div class="view-topbar">
+        <h2 class="view-title">卡片庫</h2>
+        <button class="btn btn--primary btn--small" id="lib-add-btn" type="button" data-navto="add">＋ 新增單字</button>
+      </div>
+
+      <div class="library-filters">
+        <input type="search" id="lib-search" class="text-input" placeholder="搜尋外語詞／中文意思" aria-label="搜尋卡片">
+        <div class="library-filters__row">
+          <select id="lib-filter-pack" aria-label="依詞庫篩選"></select>
+          <select id="lib-filter-category" aria-label="依分類篩選"></select>
+        </div>
+      </div>
+
+      <p class="library-count" id="lib-count">共 0 張卡片</p>
+
+      <div id="lib-empty" class="empty-state" hidden>
+        <p class="empty-state__title">卡片庫是空的</p>
+        <p class="empty-state__hint">先匯入內建詞庫，或手動新增第一張卡片吧。</p>
+        <button class="btn btn--secondary" data-navto="add" type="button">前往新增單字</button>
+      </div>
+
+      <ul class="card-list" id="lib-list"></ul>
+    </section>
+
+    <!-- ---------- 新增單字 ---------- -->
+    <section id="view-add" class="view" data-view="add" hidden>
+      <div class="view-topbar">
+        <h2 class="view-title">新增單字</h2>
+      </div>
+
+      <div class="tab-row" id="add-tabs" role="tablist" aria-label="新增方式選擇">
+        <button class="tab-btn is-active" data-tab="import" type="button" role="tab" aria-selected="true">匯入詞庫</button>
+        <button class="tab-btn" data-tab="manual" type="button" role="tab" aria-selected="false">手動新增</button>
+        <button class="tab-btn" data-tab="batch" type="button" role="tab" aria-selected="false">批次貼上</button>
+      </div>
+
+      <!-- 匯入內建詞庫 -->
+      <div class="add-panel" id="add-panel-import">
+        <p class="panel-hint">一鍵加入原創編寫的入門詞庫，重複匯入不會產生重複卡片。</p>
+        <div id="add-import-list" class="pack-list"></div>
+      </div>
+
+      <!-- 手動新增 -->
+      <div class="add-panel" id="add-panel-manual" hidden>
+        <form id="add-manual-form" class="form-grid">
+          <label class="field">
+            <span class="field__label">語言</span>
+            <select id="manual-lang" name="lang">
+              <option value="es">西文</option>
+              <option value="en">英文</option>
+              <option value="ja">日文</option>
+            </select>
+          </label>
+          <label class="field">
+            <span class="field__label">外語詞 *</span>
+            <input type="text" id="manual-term" name="term" class="text-input" required>
+          </label>
+          <label class="field">
+            <span class="field__label">中文意思 *</span>
+            <input type="text" id="manual-meaning" name="meaning" class="text-input" required>
+          </label>
+          <label class="field">
+            <span class="field__label">讀音（選填，日文可填羅馬拼音）</span>
+            <input type="text" id="manual-reading" name="reading" class="text-input">
+          </label>
+          <label class="field">
+            <span class="field__label">分類（選填）</span>
+            <input type="text" id="manual-category" name="category" class="text-input" placeholder="例如：旅行、生活用品">
+          </label>
+          <label class="field">
+            <span class="field__label">例句（選填）</span>
+            <input type="text" id="manual-example" name="example" class="text-input">
+          </label>
+          <button class="btn btn--primary btn--block" type="submit">加入卡片</button>
+        </form>
+      </div>
+
+      <!-- 批次貼上 -->
+      <div class="add-panel" id="add-panel-batch" hidden>
+        <p class="panel-hint">每行一組，格式為「外語 | 中文」或「外語,中文」。</p>
+        <label class="field">
+          <span class="field__label">語言</span>
+          <select id="batch-lang">
+            <option value="es">西文</option>
+            <option value="en">英文</option>
+            <option value="ja">日文</option>
+          </select>
+        </label>
+        <label class="field">
+          <span class="field__label">分類（選填，套用於整批）</span>
+          <input type="text" id="batch-category" class="text-input" placeholder="例如：自訂">
+        </label>
+        <textarea id="batch-text" class="textarea-input" rows="6" placeholder="gato | 貓&#10;perro, 狗"></textarea>
+        <p class="panel-hint" id="batch-preview">尚未輸入內容</p>
+        <button class="btn btn--primary btn--block" id="batch-submit" type="button">加入這批卡片</button>
+      </div>
+    </section>
+
+    <!-- ---------- 錯題本 ---------- -->
+    <section id="view-mistakes" class="view" data-view="mistakes" hidden>
+      <div class="view-topbar">
+        <h2 class="view-title">錯題本</h2>
+      </div>
+      <p class="panel-hint">收錄驗收模式中答錯、尚未答對的卡片。在此練習不會影響複習排程。</p>
+
+      <div id="mistakes-empty" class="empty-state" hidden>
+        <p class="empty-state__title">目前沒有錯題</p>
+        <p class="empty-state__hint">繼續保持，答錯的題目都已經練回來了！</p>
+      </div>
+
+      <div id="mistakes-list-wrap">
+        <button class="btn btn--primary btn--block" id="mistakes-practice-btn" type="button">開始練習錯題</button>
+        <ul class="card-list" id="mistakes-list"></ul>
+      </div>
+
+      <!-- 錯題自由練習（選擇題形式） -->
+      <div id="mistakes-practice" class="quiz-stage" hidden>
+        <div class="view-topbar">
+          <span class="view-progress" id="mp-progress">0 / 0</span>
+          <button class="btn btn--small btn--outline" id="mp-exit" type="button">結束練習</button>
+        </div>
+        <div class="ticket-card quiz-prompt-card">
+          <span class="lang-tag" id="mp-lang-tag">ES</span>
+          <p class="quiz-prompt" id="mp-prompt">—</p>
+          <div class="quiz-options" id="mp-options" role="group" aria-label="選項"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- 設定 ---------- -->
+    <section id="view-settings" class="view" data-view="settings" hidden>
+      <div class="view-topbar">
+        <h2 class="view-title">設定</h2>
+      </div>
+
+      <div class="ticket-card">
+        <label class="field">
+          <span class="field__label">每日目標張數</span>
+          <input type="number" id="set-daily-goal" class="text-input" min="1" max="200">
+        </label>
+        <label class="field">
+          <span class="field__label">預設學習語言（新增單字／發音）</span>
+          <select id="set-learn-lang">
+            <option value="es">西文</option>
+            <option value="en">英文</option>
+            <option value="ja">日文</option>
+          </select>
+        </label>
+        <label class="field field--row">
+          <span class="field__label">深色模式</span>
+          <input type="checkbox" id="set-theme-dark" class="switch-input">
+        </label>
+        <label class="field field--row">
+          <span class="field__label">音效</span>
+          <input type="checkbox" id="set-sound" class="switch-input">
+        </label>
+        <label class="field field--row">
+          <span class="field__label">拼字寬鬆比對（忽略西文重音）</span>
+          <input type="checkbox" id="set-lax-accent" class="switch-input">
+        </label>
+      </div>
+
+      <div class="ticket-card">
+        <p class="ticket-card__label">成就徽章</p>
+        <div class="badge-grid" id="set-achievements"></div>
+      </div>
+
+      <div class="ticket-card">
+        <p class="ticket-card__label">備份與還原</p>
+        <button class="btn btn--outline btn--block" id="set-export-btn" type="button">匯出 JSON 備份</button>
+        <label class="btn btn--outline btn--block file-btn">
+          匯入 JSON 備份
+          <input type="file" id="set-import-file" accept="application/json" hidden>
+        </label>
+      </div>
+
+      <div class="ticket-card">
+        <p class="ticket-card__label">重設</p>
+        <button class="btn btn--danger-outline btn--block" id="set-reset-progress" type="button">重設進度（保留卡片）</button>
+        <button class="btn btn--danger btn--block" id="set-reset-all" type="button">完全重設（清空卡片與進度）</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===================== 底部導覽 ===================== -->
+  <nav class="bottom-nav" aria-label="主選單">
+    <button class="nav-btn is-active" data-navto="home" type="button" aria-label="首頁">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3 3 10v11h6v-6h6v6h6V10z" fill="currentColor"/></svg>
+      <span>首頁</span>
+    </button>
+    <button class="nav-btn" data-navto="review" type="button" aria-label="複習">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="4" y="3" width="12" height="16" rx="1.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M19 7v12" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+      <span>複習</span>
+    </button>
+    <button class="nav-btn" data-navto="quiz" type="button" aria-label="驗收">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 12l2 2 4-4" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      <span>驗收</span>
+    </button>
+    <button class="nav-btn" data-navto="library" type="button" aria-label="卡庫">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 4h6v16H4zM14 4h6v16h-6z" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      <span>卡庫</span>
+    </button>
+    <button class="nav-btn" data-navto="settings" type="button" aria-label="設定">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" stroke="currentColor" stroke-width="2"/></svg>
+      <span>設定</span>
+    </button>
+  </nav>
+
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="js/data/packs.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/srs.js"></script>
+<script src="js/tts.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

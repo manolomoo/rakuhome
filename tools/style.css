@@ -6,7 +6,7 @@
   --gold: #a08560;
   --teal: #165a73;
   --dusk: #3a2a4a;
-  --ochre: #5c4632;
+  --terracotta: #6b322c;
   --vermilion: #b63d2e;
   --ticket: #faf6ef;
   --shadow: 0 10px 28px rgba(28, 26, 22, .08);
@@ -145,7 +145,7 @@ h1 {
 .t-rental .stub { background: var(--slate); }
 .t-spots  .stub { background: var(--teal); }
 .t-rpg    .stub { background: var(--dusk); }
-.t-cards  .stub { background: var(--ochre); }
+.t-es     .stub { background: var(--terracotta); }
 
 /* punched edge between stub and body */
 .stub::after {
@@ -201,7 +201,7 @@ h1 {
 
 .t-spots .name em { color: var(--teal); }
 .t-rpg .name em { color: var(--dusk); }
-.t-cards .name em { color: var(--ochre); }
+.t-es .name em { color: var(--terracotta); }
 
 .desc {
   font-size: 13px;

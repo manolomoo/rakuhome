@@ -70,8 +70,15 @@
     return parts[parts.length - 1].trim();
   }
 
+  function fileWardOf(ward) {
+    if (ward && typeof ward === 'object') {
+      return nfc(ward.fileWard || ward.ward || '');
+    }
+    return nfc(ward);
+  }
+
   function suggestName(ward, cat, name) {
-    return nfc(ward) + '_' + nfc(cat) + '_' + nfc(name) + '_01.jpg';
+    return fileWardOf(ward) + '_' + nfc(cat) + '_' + nfc(name) + '_01.jpg';
   }
 
   function filenameWithoutExt(file) {
@@ -91,7 +98,7 @@
     var stemToSpot = new Map();
     list.forEach(function (spot, index) {
       SLOTS.forEach(function (slot, slotIndex) {
-        stemToSpot.set(fold(ward + '_' + spot.cat + '_' + spot.name + '_' + slot), {
+        stemToSpot.set(fold(fileWardOf(ward) + '_' + spot.cat + '_' + spot.name + '_' + slot), {
           index: index,
           slotIndex: slotIndex
         });
@@ -327,7 +334,7 @@
       var count = quotaForTier(spots.length, tier);
       if (count < 0) count = 0;
       files[key] = spots.slice(0, count).map(function (spot) {
-        return suggestName(ward.ward, spot.cat, spot.name);
+        return suggestName(ward, spot.cat, spot.name);
       });
     });
     return { files: files, synthetic: synthetic };
@@ -501,6 +508,7 @@
       date: raw && raw.date ? String(raw.date) : '',
       city: raw && raw.city ? String(raw.city) : '',
       ward: raw && raw.ward ? String(raw.ward) : '',
+      fileWard: raw && raw.fileWard ? String(raw.fileWard) : '',
       spots: spots.filter(function (spot) {
         return spot && spot.cat && spot.name;
       }).map(function (spot) {
@@ -575,7 +583,7 @@
   }
 
   function progressFor(ward) {
-    var stat = analyze(ward.ward, ward.spots, filesForAnalyze(ward));
+    var stat = analyze(ward, ward.spots, filesForAnalyze(ward));
     var key = wardKey(ward.city, ward.ward);
     var spots = ward.spots.map(function (spot, index) {
       var spotId = spotKey(ward.city, ward.ward, spot.cat, spot.name);
@@ -1691,7 +1699,7 @@
         }
       }
       var hidden = state.cat !== 'all' && state.cat !== spot.cat;
-      var file = filenameWithoutExt(suggestName(ward.ward, spot.cat, spot.name));
+      var file = filenameWithoutExt(suggestName(ward, spot.cat, spot.name));
       var boxes = SLOTS.map(function (slot, slotIndex) {
         return '<label class="tick"><input type="checkbox" data-tick="' + slotIndex + '"' +
           (ticks[slotIndex] ? ' checked' : '') + ' aria-label="' + slot + '"><span>' + slot + '</span></label>';

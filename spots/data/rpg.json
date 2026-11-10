@@ -186,6 +186,11 @@
       "city": "大阪",
       "ward": "福島區",
       "name": "福島美食預約魔王"
+    },
+    {
+      "city": "神戶",
+      "ward": "中央區",
+      "name": "舊居留地精品店長"
     }
   ],
   "achievements": [
@@ -297,6 +302,16 @@
       "rule": {
         "type": "cities",
         "min": 4
+      }
+    },
+    {
+      "id": "five-cities",
+      "name": "五城名媛",
+      "flavor": "東京、京都、大阪、福岡、神戶，五座城市的貴婦圈都認識你。",
+      "icon": "wave",
+      "rule": {
+        "type": "cities",
+        "min": 5
       }
     },
     {

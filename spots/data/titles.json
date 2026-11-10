@@ -418,6 +418,24 @@
           "icon": "radar"
         }
       ]
+    },
+    {
+      "city": "神戶",
+      "ward": "中央區",
+      "titles": [
+        {
+          "name": "港塔下午茶新手",
+          "icon": "tower"
+        },
+        {
+          "name": "舊居留地貴賓",
+          "icon": "building"
+        },
+        {
+          "name": "神戶港灣貴婦",
+          "icon": "wave"
+        }
+      ]
     }
   ],
   "cities": [
@@ -444,10 +462,16 @@
       "kicker": "征服福岡貴婦圈",
       "title": "福岡名媛親善大使",
       "icon": "roe"
+    },
+    {
+      "city": "神戶",
+      "kicker": "征服神戶貴婦圈",
+      "title": "神戶港灣名媛",
+      "icon": "wave"
     }
   ],
   "grand": {
-    "kicker": "23 區全完成",
+    "kicker": "24 區全完成",
     "title": "小僧帶路御用貴婦・日本不動產頂級名媛",
     "icon": "lens"
   }

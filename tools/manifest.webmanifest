@@ -2,7 +2,7 @@
   "id": "/tools/",
   "name": "樂房工具",
   "short_name": "樂房工具",
-  "description": "樂房常用網站入口：租屋、景點進度、英文 RPG、單字卡。",
+  "description": "樂房常用網站入口：西班牙文-拳王之路、新聞英文-貴婦養成之路、慈善撲克王大賽、物件景點照片進度表。",
   "start_url": "/tools/",
   "scope": "/",
   "display": "standalone",

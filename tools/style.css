@@ -142,10 +142,10 @@ h1 {
   transform: rotate(180deg);
 }
 
-.t-rental .stub { background: var(--slate); }
-.t-spots  .stub { background: var(--teal); }
-.t-rpg    .stub { background: var(--dusk); }
-.t-es     .stub { background: var(--terracotta); }
+.t-boxing .stub { background: var(--slate); }
+.t-news   .stub { background: var(--teal); }
+.t-poker  .stub { background: var(--dusk); }
+.t-spots  .stub { background: var(--terracotta); }
 
 /* punched edge between stub and body */
 .stub::after {
@@ -188,20 +188,6 @@ h1 {
   line-height: 1.45;
   margin: 2px 0 4px;
 }
-
-.name em {
-  display: block;
-  font-style: normal;
-  font-weight: 500;
-  font-size: 14px;
-  letter-spacing: .12em;
-  margin-top: 1px;
-  color: var(--slate);
-}
-
-.t-spots .name em { color: var(--teal); }
-.t-rpg .name em { color: var(--dusk); }
-.t-es .name em { color: var(--terracotta); }
 
 .desc {
   font-size: 13px;

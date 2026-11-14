@@ -144,6 +144,7 @@ h1 {
 
 .t-boxing .stub { background: var(--slate); }
 .t-news   .stub { background: var(--teal); }
+.t-invest .stub { background: var(--gold); }
 .t-poker  .stub { background: var(--dusk); }
 .t-spots  .stub { background: var(--terracotta); }
 

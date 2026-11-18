@@ -6,8 +6,8 @@
   "start_url": "/tools/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#efe8db",
-  "theme_color": "#2f3e4c",
+  "background_color": "#101418",
+  "theme_color": "#101418",
   "lang": "zh-Hant",
   "icons": [
     {
